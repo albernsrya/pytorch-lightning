@@ -25,7 +25,7 @@ class PSNR(_PSNR):
         self,
         data_range: Optional[float] = None,
         base: float = 10.0,
-        reduction: str = 'elementwise_mean',
+        reduction: str = "elementwise_mean",
         dim: Optional[Union[int, Tuple[int, ...]]] = None,
         compute_on_step: bool = True,
         dist_sync_on_step: bool = False,
@@ -37,4 +37,12 @@ class PSNR(_PSNR):
         .. deprecated::
             Use :class:`~torchmetrics.PSNR`. Will be removed in v1.5.0.
         """
-        void(data_range, base, reduction, dim, compute_on_step, dist_sync_on_step, process_group)
+        void(
+            data_range,
+            base,
+            reduction,
+            dim,
+            compute_on_step,
+            dist_sync_on_step,
+            process_group,
+        )

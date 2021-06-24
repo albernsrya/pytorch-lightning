@@ -173,12 +173,12 @@ class EvaluationDataLoaderLoop(DataLoaderLoop):
         model = self.trainer.lightning_module
         if self.trainer.testing:
             self.trainer.reset_test_dataloader(model)
-        elif self.trainer.val_dataloaders is None or self.trainer.reload_dataloaders_every_epoch:
+        elif (self.trainer.val_dataloaders is None or self.trainer.reload_dataloaders_every_epoch):
             self.trainer.reset_val_dataloader(model)
 
     def on_evaluation_start(self, *args: Any, **kwargs: Any) -> None:
         """Runs ``on_{validation/test}_start`` hooks"""
-        self.should_track_batch_outputs_for_epoch_end: bool = self._should_track_batch_outputs_for_epoch_end()
+        self.should_track_batch_outputs_for_epoch_end: bool = (self._should_track_batch_outputs_for_epoch_end())
 
         assert self.results is not None
         self.results.to(device=self.trainer.lightning_module.device)

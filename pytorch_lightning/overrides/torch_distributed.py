@@ -60,7 +60,7 @@ def _broadcast_object_list(object_list, src=0, group=None):
         # See note about using torch.cuda.current_device() here in docstring.
         # We cannot simply use my_rank since rank == device is not necessarily
         # true.
-        current_device = torch.device('cuda', torch.cuda.current_device())
+        current_device = torch.device("cuda", torch.cuda.current_device())
         object_sizes_tensor = object_sizes_tensor.to(current_device)
         object_sizes_tensor = object_sizes_tensor.to(current_device)
 

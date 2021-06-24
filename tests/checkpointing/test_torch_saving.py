@@ -28,7 +28,7 @@ def test_model_torch_save(tmpdir):
         default_root_dir=tmpdir,
         max_epochs=num_epochs,
     )
-    temp_path = os.path.join(tmpdir, 'temp.pt')
+    temp_path = os.path.join(tmpdir, "temp.pt")
     trainer.fit(model)
 
     # Ensure these do not fail
@@ -49,7 +49,7 @@ def test_model_torch_save_ddp_cpu(tmpdir):
         num_processes=2,
         logger=False,
     )
-    temp_path = os.path.join(tmpdir, 'temp.pt')
+    temp_path = os.path.join(tmpdir, "temp.pt")
     trainer.fit(model)
 
     # Ensure these do not fail
@@ -68,7 +68,7 @@ def test_model_torch_save_ddp_cuda(tmpdir):
         accelerator="ddp_spawn",
         gpus=2,
     )
-    temp_path = os.path.join(tmpdir, 'temp.pt')
+    temp_path = os.path.join(tmpdir, "temp.pt")
     trainer.fit(model)
 
     # Ensure these do not fail

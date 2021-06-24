@@ -37,7 +37,17 @@ def precision(
     .. deprecated::
         Use :func:`torchmetrics.functional.precision`. Will be removed in v1.5.0.
     """
-    return void(preds, target, average, mdmc_average, ignore_index, num_classes, threshold, top_k, is_multiclass)
+    return void(
+        preds,
+        target,
+        average,
+        mdmc_average,
+        ignore_index,
+        num_classes,
+        threshold,
+        top_k,
+        is_multiclass,
+    )
 
 
 @deprecated_metrics(target=_recall)
@@ -56,7 +66,17 @@ def recall(
     .. deprecated::
         Use :func:`torchmetrics.functional.accuracy`. Will be removed in v1.5.0.
     """
-    return void(preds, target, average, mdmc_average, ignore_index, num_classes, threshold, top_k, is_multiclass)
+    return void(
+        preds,
+        target,
+        average,
+        mdmc_average,
+        ignore_index,
+        num_classes,
+        threshold,
+        top_k,
+        is_multiclass,
+    )
 
 
 @deprecated_metrics(target=_precision_recall)
@@ -75,4 +95,14 @@ def precision_recall(
     .. deprecated::
         Use :func:`torchmetrics.functional.precision_recall`. Will be removed in v1.5.0.
     """
-    return void(preds, target, average, mdmc_average, ignore_index, num_classes, threshold, top_k, is_multiclass)
+    return void(
+        preds,
+        target,
+        average,
+        mdmc_average,
+        ignore_index,
+        num_classes,
+        threshold,
+        top_k,
+        is_multiclass,
+    )

@@ -44,7 +44,7 @@ class Loop(ABC):
 
     def __init__(self) -> None:
         self.iteration_count: int = 0
-        self.trainer: Optional['pl.Trainer'] = None
+        self.trainer: Optional["pl.Trainer"] = None
 
     @property
     @abstractmethod
@@ -56,7 +56,7 @@ class Loop(ABC):
         """Determine whether to return immediately from the call to :meth:`run`."""
         return False
 
-    def connect(self, trainer: 'pl.Trainer', *args: Any, **kwargs: Any) -> None:
+    def connect(self, trainer: "pl.Trainer", *args: Any, **kwargs: Any) -> None:
         """Connects Loop with all the necessary things like connectors and accelerators."""
         # TODO(@justusschock): Make the trainer a weakref/proxy
         self.trainer = trainer

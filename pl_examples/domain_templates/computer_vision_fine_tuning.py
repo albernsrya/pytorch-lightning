@@ -76,17 +76,27 @@ class MilestonesFinetuning(BaseFinetuning):
     def freeze_before_training(self, pl_module: pl.LightningModule):
         self.freeze(modules=pl_module.feature_extractor, train_bn=self.train_bn)
 
-    def finetune_function(self, pl_module: pl.LightningModule, epoch: int, optimizer: Optimizer, opt_idx: int):
+    def finetune_function(
+        self,
+        pl_module: pl.LightningModule,
+        epoch: int,
+        optimizer: Optimizer,
+        opt_idx: int,
+    ):
         if epoch == self.milestones[0]:
             # unfreeze 5 last layers
             self.unfreeze_and_add_param_group(
-                modules=pl_module.feature_extractor[-5:], optimizer=optimizer, train_bn=self.train_bn
+                modules=pl_module.feature_extractor[-5:],
+                optimizer=optimizer,
+                train_bn=self.train_bn,
             )
 
         elif epoch == self.milestones[1]:
             # unfreeze remaing layers
             self.unfreeze_and_add_param_group(
-                modules=pl_module.feature_extractor[:-5], optimizer=optimizer, train_bn=self.train_bn
+                modules=pl_module.feature_extractor[:-5],
+                optimizer=optimizer,
+                train_bn=self.train_bn,
             )
 
 
@@ -128,12 +138,17 @@ class CatDogImageDataModule(LightningDataModule):
         return transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(), self.normalize_transform
+            transforms.ToTensor(),
+            self.normalize_transform,
         ])
 
     @property
     def valid_transform(self):
-        return transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor(), self.normalize_transform])
+        return transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            self.normalize_transform,
+        ])
 
     def create_dataset(self, root, transform):
         return ImageFolder(root=root, transform=transform)
@@ -144,7 +159,12 @@ class CatDogImageDataModule(LightningDataModule):
             dataset = self.create_dataset(self.data_path.joinpath("train"), self.train_transform)
         else:
             dataset = self.create_dataset(self.data_path.joinpath("validation"), self.valid_transform)
-        return DataLoader(dataset=dataset, batch_size=self._batch_size, num_workers=self._num_workers, shuffle=train)
+        return DataLoader(
+            dataset=dataset,
+            batch_size=self._batch_size,
+            num_workers=self._num_workers,
+            shuffle=train,
+        )
 
     def train_dataloader(self):
         log.info("Training data loaded.")
@@ -275,20 +295,20 @@ class TransferLearningModel(pl.LightningModule):
 class MyLightningCLI(LightningCLI):
 
     def add_arguments_to_parser(self, parser):
-        parser.add_class_arguments(MilestonesFinetuning, 'finetuning')
-        parser.link_arguments('data.batch_size', 'model.batch_size')
-        parser.link_arguments('finetuning.milestones', 'model.milestones')
-        parser.link_arguments('finetuning.train_bn', 'model.train_bn')
+        parser.add_class_arguments(MilestonesFinetuning, "finetuning")
+        parser.link_arguments("data.batch_size", "model.batch_size")
+        parser.link_arguments("finetuning.milestones", "model.milestones")
+        parser.link_arguments("finetuning.train_bn", "model.train_bn")
         parser.set_defaults({
-            'trainer.max_epochs': 15,
-            'trainer.weights_summary': None,
-            'trainer.progress_bar_refresh_rate': 1,
-            'trainer.num_sanity_val_steps': 0,
+            "trainer.max_epochs": 15,
+            "trainer.weights_summary": None,
+            "trainer.progress_bar_refresh_rate": 1,
+            "trainer.num_sanity_val_steps": 0,
         })
 
     def instantiate_trainer(self):
-        finetuning_callback = MilestonesFinetuning(**self.config_init['finetuning'])
-        self.trainer_defaults['callbacks'] = [finetuning_callback]
+        finetuning_callback = MilestonesFinetuning(**self.config_init["finetuning"])
+        self.trainer_defaults["callbacks"] = [finetuning_callback]
         super().instantiate_trainer()
 
 

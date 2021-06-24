@@ -24,11 +24,12 @@ from tests.helpers.runif import RunIf
 
 
 @pytest.mark.parametrize(
-    "trainer_kwargs", (
+    "trainer_kwargs",
+    (
         pytest.param(dict(gpus=1), marks=RunIf(min_gpus=1)),
         pytest.param(dict(accelerator="dp", gpus=2), marks=RunIf(min_gpus=2)),
         pytest.param(dict(accelerator="ddp_spawn", gpus=2), marks=RunIf(min_gpus=2)),
-    )
+    ),
 )
 def test_evaluate(tmpdir, trainer_kwargs):
     tutils.set_random_master_port()
@@ -45,15 +46,15 @@ def test_evaluate(tmpdir, trainer_kwargs):
     )
 
     trainer.fit(model, datamodule=dm)
-    assert 'ckpt' in trainer.checkpoint_callback.best_model_path
+    assert "ckpt" in trainer.checkpoint_callback.best_model_path
 
     old_weights = model.layer_0.weight.clone().detach().cpu()
 
     result = trainer.validate(datamodule=dm)
-    assert result[0]['val_acc'] > 0.55
+    assert result[0]["val_acc"] > 0.55
 
     result = trainer.test(datamodule=dm)
-    assert result[0]['test_acc'] > 0.55
+    assert result[0]["test_acc"] > 0.55
 
     # make sure weights didn't change
     new_weights = model.layer_0.weight.clone().detach().cpu()
@@ -110,7 +111,7 @@ def test_configure_sharded_model_false(tmpdir):
         limit_train_batches=2,
         limit_val_batches=2,
         max_epochs=1,
-        plugins=CustomPlugin(device=torch.device("cpu"))
+        plugins=CustomPlugin(device=torch.device("cpu")),
     )
     trainer.fit(model)
 

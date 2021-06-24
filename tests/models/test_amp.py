@@ -55,7 +55,7 @@ class AMPTestModel(BoringModel):
         return output
 
 
-@pytest.mark.skip(reason='dp + amp not supported currently')  # TODO
+@pytest.mark.skip(reason="dp + amp not supported currently")  # TODO
 @RunIf(min_gpus=1)
 def test_amp_single_gpu_dp(tmpdir):
     """Make sure DP/DDP + AMP work."""
@@ -65,7 +65,7 @@ def test_amp_single_gpu_dp(tmpdir):
         default_root_dir=tmpdir,
         max_epochs=1,
         gpus=1,
-        accelerator='dp',
+        accelerator="dp",
         precision=16,
     )
 
@@ -86,7 +86,7 @@ def test_amp_single_gpu_ddp_spawn(tmpdir):
         default_root_dir=tmpdir,
         max_epochs=1,
         gpus=1,
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         precision=16,
     )
 
@@ -98,7 +98,7 @@ def test_amp_single_gpu_ddp_spawn(tmpdir):
     assert trainer.state.finished, f"Training failed with {trainer.state}"
 
 
-@pytest.mark.skip(reason='dp + amp not supported currently')  # TODO
+@pytest.mark.skip(reason="dp + amp not supported currently")  # TODO
 @RunIf(min_gpus=1)
 def test_amp_multi_gpu_dp(tmpdir):
     """Make sure DP/DDP + AMP work."""
@@ -108,7 +108,7 @@ def test_amp_multi_gpu_dp(tmpdir):
         default_root_dir=tmpdir,
         max_epochs=1,
         gpus=2,
-        accelerator='dp',
+        accelerator="dp",
         precision=16,
     )
 
@@ -127,7 +127,7 @@ def test_amp_multi_gpu_ddp_spawn(tmpdir):
         default_root_dir=tmpdir,
         max_epochs=1,
         gpus=2,
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         precision=16,
     )
 
@@ -141,14 +141,15 @@ def test_amp_multi_gpu_ddp_spawn(tmpdir):
 
 @RunIf(min_gpus=2)
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "SLURM_NTASKS": "1",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "LOCAL_RANK": "0",
         "SLURM_LOCALID": "0",
         "SLURM_PROCID": "0",
-    }
+    },
 )
 def test_amp_gpu_ddp_slurm_managed(tmpdir):
     """Make sure DDP + AMP work."""
@@ -168,7 +169,7 @@ def test_amp_gpu_ddp_slurm_managed(tmpdir):
         default_root_dir=tmpdir,
         max_epochs=1,
         gpus=[0],
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         precision=16,
         callbacks=[checkpoint],
         logger=logger,
@@ -176,15 +177,15 @@ def test_amp_gpu_ddp_slurm_managed(tmpdir):
     trainer.fit(model)
 
     # correct result and ok accuracy
-    assert trainer.state.finished, 'amp + ddp model failed to complete'
+    assert trainer.state.finished, "amp + ddp model failed to complete"
 
     # test root model address
     assert isinstance(trainer.training_type_plugin.cluster_environment, SLURMEnvironment)
-    assert trainer.training_type_plugin.cluster_environment.resolve_root_node_address('abc') == 'abc'
-    assert trainer.training_type_plugin.cluster_environment.resolve_root_node_address('abc[23]') == 'abc23'
-    assert trainer.training_type_plugin.cluster_environment.resolve_root_node_address('abc[23-24]') == 'abc23'
-    generated = trainer.training_type_plugin.cluster_environment.resolve_root_node_address('abc[23-24, 45-40, 40]')
-    assert generated == 'abc23'
+    assert (trainer.training_type_plugin.cluster_environment.resolve_root_node_address("abc") == "abc")
+    assert (trainer.training_type_plugin.cluster_environment.resolve_root_node_address("abc[23]") == "abc23")
+    assert (trainer.training_type_plugin.cluster_environment.resolve_root_node_address("abc[23-24]") == "abc23")
+    generated = (trainer.training_type_plugin.cluster_environment.resolve_root_node_address("abc[23-24, 45-40, 40]"))
+    assert generated == "abc23"
 
 
 @pytest.mark.skipif(torch.cuda.is_available(), reason="test is restricted only on CPU")
@@ -201,19 +202,19 @@ def test_amp_without_apex(tmpdir):
 
     trainer = Trainer(
         default_root_dir=tmpdir,
-        amp_backend='native',
+        amp_backend="native",
     )
     assert trainer.amp_backend is None
 
     trainer = Trainer(
         default_root_dir=tmpdir,
         max_epochs=1,
-        amp_backend='apex',
+        amp_backend="apex",
     )
     assert trainer.amp_backend is None
     trainer.fit(model)
     assert trainer.state.finished, f"Training failed with {trainer.state}"
-    assert trainer.dev_debugger.count_events('AMP') == 0
+    assert trainer.dev_debugger.count_events("AMP") == 0
 
 
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})
@@ -240,13 +241,13 @@ def test_amp_with_apex(tmpdir):
         default_root_dir=tmpdir,
         max_steps=5,
         precision=16,
-        amp_backend='apex',
+        amp_backend="apex",
         gpus=1,
     )
     assert str(trainer.amp_backend) == "AMPType.APEX"
     trainer.fit(model)
     assert trainer.state.finished, f"Training failed with {trainer.state}"
-    assert trainer.dev_debugger.count_events('AMP') == 10
+    assert trainer.dev_debugger.count_events("AMP") == 10
 
-    assert isinstance(trainer.lr_schedulers[0]['scheduler'].optimizer, optim.Adam)
-    assert isinstance(trainer.lr_schedulers[1]['scheduler'].optimizer, optim.SGD)
+    assert isinstance(trainer.lr_schedulers[0]["scheduler"].optimizer, optim.Adam)
+    assert isinstance(trainer.lr_schedulers[1]["scheduler"].optimizer, optim.SGD)

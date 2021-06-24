@@ -72,24 +72,29 @@ class SklearnDataModule(LightningDataModule):
         self._y_type = y_type
 
     def _split_data(self):
-        self.x_train, self.x_test, self.y_train, self.y_test = \
-            train_test_split(self._x, self._y, test_size=0.20, random_state=42)
-        self.x_train, self.x_valid, self.y_train, self.y_valid = \
-            train_test_split(self.x_train, self.y_train, test_size=0.40, random_state=42)
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
+            self._x, self._y, test_size=0.20, random_state=42
+        )
+        self.x_train, self.x_valid, self.y_train, self.y_valid = train_test_split(
+            self.x_train, self.y_train, test_size=0.40, random_state=42
+        )
 
     def train_dataloader(self):
         return DataLoader(
-            SklearnDataset(self.x_train, self.y_train, self._x_type, self._y_type), batch_size=self.batch_size
+            SklearnDataset(self.x_train, self.y_train, self._x_type, self._y_type),
+            batch_size=self.batch_size,
         )
 
     def val_dataloader(self):
         return DataLoader(
-            SklearnDataset(self.x_valid, self.y_valid, self._x_type, self._y_type), batch_size=self.batch_size
+            SklearnDataset(self.x_valid, self.y_valid, self._x_type, self._y_type),
+            batch_size=self.batch_size,
         )
 
     def test_dataloader(self):
         return DataLoader(
-            SklearnDataset(self.x_test, self.y_test, self._x_type, self._y_type), batch_size=self.batch_size
+            SklearnDataset(self.x_test, self.y_test, self._x_type, self._y_type),
+            batch_size=self.batch_size,
         )
 
     @property
@@ -101,7 +106,11 @@ class ClassifDataModule(SklearnDataModule):
 
     def __init__(self, num_features=32, length=800, num_classes=3, batch_size=10):
         data = make_classification(
-            n_samples=length, n_features=num_features, n_classes=num_classes, n_clusters_per_class=1, random_state=42
+            n_samples=length,
+            n_features=num_features,
+            n_classes=num_classes,
+            n_clusters_per_class=1,
+            random_state=42,
         )
         super().__init__(data, x_type=torch.float32, y_type=torch.long, batch_size=batch_size)
 

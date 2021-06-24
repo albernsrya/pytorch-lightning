@@ -29,7 +29,7 @@ def test_finetuning_with_resume_from_checkpoint(tmpdir):
 
     seed_everything(4)
 
-    checkpoint_callback = ModelCheckpoint(monitor='val_loss', dirpath=tmpdir, filename="{epoch:02d}", save_top_k=-1)
+    checkpoint_callback = ModelCheckpoint(monitor="val_loss", dirpath=tmpdir, filename="{epoch:02d}", save_top_k=-1)
 
     class ExtendedBoringModel(BoringModel):
 
@@ -55,7 +55,7 @@ def test_finetuning_with_resume_from_checkpoint(tmpdir):
         logger=False,
     )
     trainer.fit(model)
-    assert os.listdir(tmpdir) == ['epoch=00.ckpt']
+    assert os.listdir(tmpdir) == ["epoch=00.ckpt"]
 
     best_model_paths = [checkpoint_callback.best_model_path]
     results = []

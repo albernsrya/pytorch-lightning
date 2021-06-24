@@ -151,7 +151,7 @@ def test_multiple_optimizers_no_opt_idx_argument(tmpdir):
 
     trainer = pl.Trainer(default_root_dir=tmpdir, fast_dev_run=2)
 
-    with pytest.raises(ValueError, match='`training_step` is missing the `optimizer_idx`'):
+    with pytest.raises(ValueError, match="`training_step` is missing the `optimizer_idx`"):
         trainer.fit(TestModel())
 
 
@@ -177,7 +177,7 @@ def test_custom_optimizer_step_with_multiple_optimizers(tmpdir):
 
         def training_step(self, batch, batch_idx, optimizer_idx):
             self.training_step_called[optimizer_idx] += 1
-            x = self.layer_a(batch[0]) if (optimizer_idx == 0) else self.layer_b(batch[0])
+            x = (self.layer_a(batch[0]) if (optimizer_idx == 0) else self.layer_b(batch[0]))
             loss = torch.nn.functional.mse_loss(x, torch.ones_like(x))
             return loss
 

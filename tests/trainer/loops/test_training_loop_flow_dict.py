@@ -33,7 +33,7 @@ def test__training_step__flow_dict(tmpdir):
             acc = self.step(batch, batch_idx)
             acc = acc + batch_idx
             self.training_step_called = True
-            return {'loss': acc, 'random_things': [1, 'a', torch.tensor(2)]}
+            return {"loss": acc, "random_things": [1, "a", torch.tensor(2)]}
 
         def backward(self, loss, optimizer, optimizer_idx):
             return LightningModule.backward(self, loss, optimizer, optimizer_idx)
@@ -68,7 +68,7 @@ def test__training_step__tr_step_end__flow_dict(tmpdir):
             acc = self.step(batch, batch_idx)
             acc = acc + batch_idx
             self.training_step_called = True
-            self.out = {'loss': acc, 'random_things': [1, 'a', torch.tensor(2)]}
+            self.out = {"loss": acc, "random_things": [1, "a", torch.tensor(2)]}
             return self.out
 
         def training_step_end(self, tr_step_output):
@@ -111,7 +111,7 @@ def test__training_step__epoch_end__flow_dict(tmpdir):
             acc = acc + batch_idx
 
             self.training_step_called = True
-            out = {'loss': acc, 'random_things': [1, 'a', torch.tensor(2)]}
+            out = {"loss": acc, "random_things": [1, "a", torch.tensor(2)]}
             return out
 
         def training_epoch_end(self, outputs):
@@ -123,7 +123,7 @@ def test__training_step__epoch_end__flow_dict(tmpdir):
             for b in outputs:
                 assert isinstance(b, dict)
                 assert self.count_num_graphs(b) == 0
-                assert {'random_things', 'loss'} == set(b.keys())
+                assert {"random_things", "loss"} == set(b.keys())
 
         def backward(self, loss, optimizer, optimizer_idx):
             return LightningModule.backward(self, loss, optimizer, optimizer_idx)
@@ -159,7 +159,7 @@ def test__training_step__step_end__epoch_end__flow_dict(tmpdir):
             acc = acc + batch_idx
 
             self.training_step_called = True
-            self.out = {'loss': acc, 'random_things': [1, 'a', torch.tensor(2)]}
+            self.out = {"loss": acc, "random_things": [1, "a", torch.tensor(2)]}
             return self.out
 
         def training_step_end(self, tr_step_output):
@@ -177,7 +177,7 @@ def test__training_step__step_end__epoch_end__flow_dict(tmpdir):
             for b in outputs:
                 assert isinstance(b, dict)
                 assert self.count_num_graphs(b) == 0
-                assert {'random_things', 'loss'} == set(b.keys())
+                assert {"random_things", "loss"} == set(b.keys())
 
         def backward(self, loss, optimizer, optimizer_idx):
             return LightningModule.backward(self, loss, optimizer, optimizer_idx)

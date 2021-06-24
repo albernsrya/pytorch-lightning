@@ -49,15 +49,21 @@ class DeviceAssertCallback(Callback):
         assert model.device == model.module.module.device
 
 
-@pytest.mark.parametrize(['dst_dtype'], [
-    pytest.param(torch.float),
-    pytest.param(torch.double),
-    pytest.param(torch.half),
-])
-@pytest.mark.parametrize(['dst_device'], [
-    pytest.param(torch.device('cpu')),
-    pytest.param(torch.device('cuda', 0)),
-])
+@pytest.mark.parametrize(
+    ["dst_dtype"],
+    [
+        pytest.param(torch.float),
+        pytest.param(torch.double),
+        pytest.param(torch.half),
+    ],
+)
+@pytest.mark.parametrize(
+    ["dst_device"],
+    [
+        pytest.param(torch.device("cpu")),
+        pytest.param(torch.device("cuda", 0)),
+    ],
+)
 @RunIf(min_gpus=1)
 def test_submodules_device_and_dtype(dst_device, dst_dtype):
     """
@@ -66,11 +72,11 @@ def test_submodules_device_and_dtype(dst_device, dst_dtype):
     """
 
     model = TopModule()
-    assert model.device == torch.device('cpu')
+    assert model.device == torch.device("cpu")
     model = model.to(device=dst_device, dtype=dst_dtype)
     # nn.Module does not have these attributes
-    assert not hasattr(model.module, '_device')
-    assert not hasattr(model.module, '_dtype')
+    assert not hasattr(model.module, "_device")
+    assert not hasattr(model.module, "_dtype")
     # device and dtype change should propagate down into all children
     assert model.device == model.module.module.device == dst_device
     assert model.dtype == model.module.module.dtype == dst_dtype
@@ -81,7 +87,7 @@ def test_submodules_multi_gpu_dp(tmpdir):
     model = TopModule()
     trainer = Trainer(
         default_root_dir=tmpdir,
-        accelerator='dp',
+        accelerator="dp",
         gpus=2,
         callbacks=[DeviceAssertCallback()],
         max_steps=1,
@@ -94,7 +100,7 @@ def test_submodules_multi_gpu_ddp_spawn(tmpdir):
     model = TopModule()
     trainer = Trainer(
         default_root_dir=tmpdir,
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         gpus=2,
         callbacks=[DeviceAssertCallback()],
         max_steps=1,
@@ -103,12 +109,12 @@ def test_submodules_multi_gpu_ddp_spawn(tmpdir):
 
 
 @pytest.mark.parametrize(
-    ['device'],
+    ["device"],
     [
         pytest.param(None),  # explicitly call without an index to see if the returning device contains an index
         pytest.param(0),
-        pytest.param(torch.device('cuda', 0)),
-    ]
+        pytest.param(torch.device("cuda", 0)),
+    ],
 )
 @RunIf(min_gpus=1)
 def test_gpu_cuda_device(device):
@@ -117,6 +123,6 @@ def test_gpu_cuda_device(device):
     model.cuda(device)
 
     device = model.device
-    assert device.type == 'cuda'
+    assert device.type == "cuda"
     assert device.index is not None
     assert device.index == torch.cuda.current_device()

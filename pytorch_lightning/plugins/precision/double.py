@@ -82,7 +82,7 @@ class LightningDoublePrecisionModule(_LightningPrecisionModuleWrapperBase):
 
 
 class DoublePrecisionPlugin(PrecisionPlugin):
-    """ Plugin for training with double (``torch.float64``) precision. """
+    """Plugin for training with double (``torch.float64``) precision."""
 
     precision: int = 64
 
@@ -91,7 +91,7 @@ class DoublePrecisionPlugin(PrecisionPlugin):
         model: nn.Module,
         optimizers: List[Optimizer],
         lr_schedulers: List[Any],
-    ) -> Tuple[nn.Module, List['Optimizer'], List[Any]]:
+    ) -> Tuple[nn.Module, List["Optimizer"], List[Any]]:
         """Converts the model to double precision and wraps it in a ``LightningDoublePrecisionModule`` to convert
         incoming floating point data to double (``torch.float64``) precision. Does not alter `optimizers` or
         `lr_schedulers`.

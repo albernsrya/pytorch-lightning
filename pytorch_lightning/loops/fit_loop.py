@@ -46,11 +46,11 @@ class FitLoop(Loop):
         min_epochs: Optional[int] = None,
         max_epochs: Optional[int] = None,
         min_steps: Optional[int] = None,
-        max_steps: Optional[int] = None
+        max_steps: Optional[int] = None,
     ):
         super().__init__()
-        self.max_epochs = 1000 if (max_epochs is None and max_steps is None) else max_epochs
-        self.min_epochs = 1 if (min_epochs is None and min_steps is None) else min_epochs
+        self.max_epochs = (1000 if (max_epochs is None and max_steps is None) else max_epochs)
+        self.min_epochs = (1 if (min_epochs is None and min_steps is None) else min_epochs)
         self.training_loop = TrainingEpochLoop(min_steps, max_steps)
         self.validation_loop = EvaluationDataLoaderLoop()
 
@@ -121,12 +121,12 @@ class FitLoop(Loop):
 
     @property
     def _skip_backward(self) -> bool:
-        """ Determines whether the loop will skip backward during automatic optimization. """
+        """Determines whether the loop will skip backward during automatic optimization."""
         return self.training_loop.batch_loop._skip_backward
 
     @_skip_backward.setter
     def _skip_backward(self, value: bool) -> None:
-        """ Determines whether the loop will skip backward during automatic optimization. """
+        """Determines whether the loop will skip backward during automatic optimization."""
         self.training_loop.batch_loop._skip_backward = value
 
     @property
@@ -138,20 +138,20 @@ class FitLoop(Loop):
         """
         # TODO(@awaelchli): Move track steps inside training loop and move part of these condition inside training loop
         stop_steps = self.max_steps is not None and self.global_step >= self.max_steps
-        stop_epochs = self.max_epochs is not None and self.current_epoch >= self.max_epochs
+        stop_epochs = (self.max_epochs is not None and self.current_epoch >= self.max_epochs)
 
         should_stop = False
         if self.trainer.should_stop:
             # early stopping
-            met_min_epochs = self.current_epoch >= self.min_epochs if self.min_epochs else True
-            met_min_steps = self.global_step >= self.min_steps if self.min_steps else True
+            met_min_epochs = (self.current_epoch >= self.min_epochs if self.min_epochs else True)
+            met_min_steps = (self.global_step >= self.min_steps if self.min_steps else True)
             if met_min_epochs and met_min_steps:
                 should_stop = True
             else:
                 log.info(
-                    'Trainer was signaled to stop but required minimum epochs'
-                    f' ({self.min_epochs}) or minimum steps ({self.min_steps}) has'
-                    ' not been met. Training will continue...'
+                    "Trainer was signaled to stop but required minimum epochs"
+                    f" ({self.min_epochs}) or minimum steps ({self.min_steps}) has"
+                    " not been met. Training will continue..."
                 )
         self.trainer.should_stop = should_stop
 
@@ -162,7 +162,7 @@ class FitLoop(Loop):
         """Whether we should skip the training and immediately return from the call to :meth:`run`."""
         return self.done or self.trainer.num_training_batches == 0
 
-    def connect(self, trainer: 'pl.Trainer', *args: Any, **kwargs: Any) -> None:
+    def connect(self, trainer: "pl.Trainer", *args: Any, **kwargs: Any) -> None:
         """Connects the loop with necessary arguments like the trainer"""
         super().connect(trainer, *args, **kwargs)
         self.training_loop.connect(trainer)
@@ -223,9 +223,9 @@ class FitLoop(Loop):
         if self.training_loop.batches_seen == 0:
             return
 
-        self.training_loop.update_lr_schedulers('epoch', update_plateau_schedulers=True)
+        self.training_loop.update_lr_schedulers("epoch", update_plateau_schedulers=True)
 
-        did_train_only = self.trainer.disable_validation or self.trainer.evaluation_loop.skip
+        did_train_only = (self.trainer.disable_validation or self.trainer.evaluation_loop.skip)
         if did_train_only:
             self.global_step -= 1
             self._check_checkpoint_callback(True)

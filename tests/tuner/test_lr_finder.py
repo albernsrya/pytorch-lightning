@@ -26,7 +26,7 @@ from tests.helpers.simple_models import ClassificationModel
 
 
 def test_error_on_more_than_1_optimizer(tmpdir):
-    """ Check that error is thrown when more than 1 optimizer is passed """
+    """Check that error is thrown when more than 1 optimizer is passed"""
 
     model = EvalModelTemplate()
     model.configure_optimizers = model.configure_optimizers__multiple_schedulers
@@ -42,7 +42,7 @@ def test_error_on_more_than_1_optimizer(tmpdir):
 
 
 def test_model_reset_correctly(tmpdir):
-    """ Check that model weights are correctly reset after lr_find() """
+    """Check that model weights are correctly reset after lr_find()"""
 
     model = EvalModelTemplate()
 
@@ -59,14 +59,15 @@ def test_model_reset_correctly(tmpdir):
     after_state_dict = model.state_dict()
 
     for key in before_state_dict.keys():
-        assert torch.all(torch.eq(before_state_dict[key], after_state_dict[key])), \
-            'Model was not reset correctly after learning rate finder'
+        assert torch.all(
+            torch.eq(before_state_dict[key], after_state_dict[key])
+        ), "Model was not reset correctly after learning rate finder"
 
-    assert not os.path.exists(tmpdir / 'lr_find_temp_model.ckpt')
+    assert not os.path.exists(tmpdir / "lr_find_temp_model.ckpt")
 
 
 def test_trainer_reset_correctly(tmpdir):
-    """ Check that all trainer parameters are reset correctly after lr_find() """
+    """Check that all trainer parameters are reset correctly after lr_find()"""
 
     model = EvalModelTemplate()
 
@@ -77,13 +78,13 @@ def test_trainer_reset_correctly(tmpdir):
     )
 
     changed_attributes = [
-        'accumulate_grad_batches',
-        'auto_lr_find',
-        'callbacks',
-        'checkpoint_callback',
-        'current_epoch',
-        'logger',
-        'max_steps',
+        "accumulate_grad_batches",
+        "auto_lr_find",
+        "callbacks",
+        "checkpoint_callback",
+        "current_epoch",
+        "logger",
+        "max_steps",
     ]
     expected = {ca: getattr(trainer, ca) for ca in changed_attributes}
     trainer.tuner.lr_find(model, num_training=5)
@@ -93,12 +94,12 @@ def test_trainer_reset_correctly(tmpdir):
     assert model.trainer == trainer
 
 
-@pytest.mark.parametrize('use_hparams', [False, True])
+@pytest.mark.parametrize("use_hparams", [False, True])
 def test_trainer_arg_bool(tmpdir, use_hparams):
-    """ Test that setting trainer arg to bool works """
+    """Test that setting trainer arg to bool works"""
     hparams = EvalModelTemplate.get_default_hparams()
     model = EvalModelTemplate(**hparams)
-    before_lr = hparams.get('learning_rate')
+    before_lr = hparams.get("learning_rate")
     if use_hparams:
         del model.learning_rate
         model.configure_optimizers = model.configure_optimizers__lr_from_hparams
@@ -116,17 +117,16 @@ def test_trainer_arg_bool(tmpdir, use_hparams):
     else:
         after_lr = model.learning_rate
 
-    assert before_lr != after_lr, \
-        'Learning rate was not altered after running learning rate finder'
+    assert (before_lr != after_lr), "Learning rate was not altered after running learning rate finder"
 
 
-@pytest.mark.parametrize('use_hparams', [False, True])
+@pytest.mark.parametrize("use_hparams", [False, True])
 def test_trainer_arg_str(tmpdir, use_hparams):
-    """ Test that setting trainer arg to string works """
+    """Test that setting trainer arg to string works"""
     hparams = EvalModelTemplate.get_default_hparams()
     model = EvalModelTemplate(**hparams)
     model.my_fancy_lr = 1.0  # update with non-standard field
-    model.hparams['my_fancy_lr'] = 1.0
+    model.hparams["my_fancy_lr"] = 1.0
     before_lr = model.my_fancy_lr
     if use_hparams:
         del model.my_fancy_lr
@@ -136,7 +136,7 @@ def test_trainer_arg_str(tmpdir, use_hparams):
     trainer = Trainer(
         default_root_dir=tmpdir,
         max_epochs=2,
-        auto_lr_find='my_fancy_lr',
+        auto_lr_find="my_fancy_lr",
     )
 
     trainer.tune(model)
@@ -145,37 +145,35 @@ def test_trainer_arg_str(tmpdir, use_hparams):
     else:
         after_lr = model.my_fancy_lr
 
-    assert before_lr != after_lr, \
-        'Learning rate was not altered after running learning rate finder'
+    assert (before_lr != after_lr), "Learning rate was not altered after running learning rate finder"
 
 
-@pytest.mark.parametrize('optimizer', ['Adam', 'Adagrad'])
+@pytest.mark.parametrize("optimizer", ["Adam", "Adagrad"])
 def test_call_to_trainer_method(tmpdir, optimizer):
-    """ Test that directly calling the trainer method works """
+    """Test that directly calling the trainer method works"""
 
     hparams = EvalModelTemplate.get_default_hparams()
     model = EvalModelTemplate(**hparams)
-    if optimizer == 'adagrad':
+    if optimizer == "adagrad":
         model.configure_optimizers = model.configure_optimizers__adagrad
 
-    before_lr = hparams.get('learning_rate')
+    before_lr = hparams.get("learning_rate")
     # logger file to get meta
     trainer = Trainer(
         default_root_dir=tmpdir,
         max_epochs=2,
     )
 
-    lrfinder = trainer.tuner.lr_find(model, mode='linear')
+    lrfinder = trainer.tuner.lr_find(model, mode="linear")
     after_lr = lrfinder.suggestion()
     model.learning_rate = after_lr
     trainer.tune(model)
 
-    assert before_lr != after_lr, \
-        'Learning rate was not altered after running learning rate finder'
+    assert (before_lr != after_lr), "Learning rate was not altered after running learning rate finder"
 
 
 def test_datamodule_parameter(tmpdir):
-    """ Test that the datamodule parameter works """
+    """Test that the datamodule parameter works"""
     seed_everything(1)
 
     dm = ClassifDataModule()
@@ -192,12 +190,11 @@ def test_datamodule_parameter(tmpdir):
     after_lr = lrfinder.suggestion()
     model.lr = after_lr
 
-    assert before_lr != after_lr, \
-        'Learning rate was not altered after running learning rate finder'
+    assert (before_lr != after_lr), "Learning rate was not altered after running learning rate finder"
 
 
 def test_accumulation_and_early_stopping(tmpdir):
-    """ Test that early stopping of learning rate finder works, and that accumulation also works for this feature """
+    """Test that early stopping of learning rate finder works, and that accumulation also works for this feature"""
 
     class TestModel(BoringModel):
 
@@ -213,12 +210,12 @@ def test_accumulation_and_early_stopping(tmpdir):
     lrfinder = trainer.tuner.lr_find(model, early_stop_threshold=None)
 
     assert lrfinder.suggestion() != 1e-3
-    assert len(lrfinder.results['lr']) == 100
+    assert len(lrfinder.results["lr"]) == 100
     assert lrfinder._total_batch_idx == 200
 
 
 def test_suggestion_parameters_work(tmpdir):
-    """ Test that default skipping does not alter results in basic case """
+    """Test that default skipping does not alter results in basic case"""
 
     dm = ClassifDataModule()
     model = ClassificationModel()
@@ -233,11 +230,11 @@ def test_suggestion_parameters_work(tmpdir):
     lr1 = lrfinder.suggestion(skip_begin=10)  # default
     lr2 = lrfinder.suggestion(skip_begin=150)  # way too high, should have an impact
 
-    assert lr1 != lr2, 'Skipping parameter did not influence learning rate'
+    assert lr1 != lr2, "Skipping parameter did not influence learning rate"
 
 
 def test_suggestion_with_non_finite_values(tmpdir):
-    """ Test that non-finite values does not alter results """
+    """Test that non-finite values does not alter results"""
 
     hparams = EvalModelTemplate.get_default_hparams()
     model = EvalModelTemplate(**hparams)
@@ -250,22 +247,21 @@ def test_suggestion_with_non_finite_values(tmpdir):
 
     lrfinder = trainer.tuner.lr_find(model)
     before_lr = lrfinder.suggestion()
-    lrfinder.results['loss'][-1] = float('nan')
+    lrfinder.results["loss"][-1] = float("nan")
     after_lr = lrfinder.suggestion()
 
-    assert before_lr == after_lr, \
-        'Learning rate was altered because of non-finite loss values'
+    assert (before_lr == after_lr), "Learning rate was altered because of non-finite loss values"
 
 
 def test_lr_finder_fails_fast_on_bad_config(tmpdir):
-    """ Test that tune fails if the model does not have a lr BEFORE running lr find """
+    """Test that tune fails if the model does not have a lr BEFORE running lr find"""
     trainer = Trainer(default_root_dir=tmpdir, max_steps=2, auto_lr_find=True)
-    with pytest.raises(MisconfigurationException, match='should have one of these fields'):
+    with pytest.raises(MisconfigurationException, match="should have one of these fields"):
         trainer.tune(BoringModel())
 
 
 def test_lr_find_with_bs_scale(tmpdir):
-    """ Test that lr_find runs with batch_size_scaling """
+    """Test that lr_find runs with batch_size_scaling"""
 
     class BoringModelTune(BoringModel):
 
@@ -277,10 +273,15 @@ def test_lr_find_with_bs_scale(tmpdir):
     before_lr = model.hparams.learning_rate
 
     # logger file to get meta
-    trainer = Trainer(default_root_dir=tmpdir, max_epochs=3, auto_lr_find=True, auto_scale_batch_size=True)
+    trainer = Trainer(
+        default_root_dir=tmpdir,
+        max_epochs=3,
+        auto_lr_find=True,
+        auto_scale_batch_size=True,
+    )
     result = trainer.tune(model)
-    bs = result['scale_batch_size']
-    lr = result['lr_find'].suggestion()
+    bs = result["scale_batch_size"]
+    lr = result["lr_find"].suggestion()
 
     assert lr != before_lr
     assert isinstance(bs, int)

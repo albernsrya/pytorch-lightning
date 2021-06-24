@@ -28,7 +28,7 @@ class RandomDictDataset(Dataset):
     def __getitem__(self, index):
         a = self.data[index]
         b = a + 2
-        return {'a': a, 'b': b}
+        return {"a": a, "b": b}
 
     def __len__(self):
         return self.len
@@ -124,7 +124,7 @@ class BoringModel(LightningModule):
         return {"x": loss}
 
     def validation_epoch_end(self, outputs) -> None:
-        torch.stack([x['x'] for x in outputs]).mean()
+        torch.stack([x["x"] for x in outputs]).mean()
 
     def test_step(self, batch, batch_idx):
         output = self(batch)
@@ -154,7 +154,7 @@ class BoringModel(LightningModule):
 
 class BoringDataModule(LightningDataModule):
 
-    def __init__(self, data_dir: str = './'):
+    def __init__(self, data_dir: str = "./"):
         super().__init__()
         self.data_dir = data_dir
         self.non_picklable = None

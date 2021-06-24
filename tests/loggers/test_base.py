@@ -39,13 +39,13 @@ def test_logger_collection():
 
     assert logger.save_dir is None
 
-    logger.update_agg_funcs({'test': np.mean}, np.sum)
-    mock1.update_agg_funcs.assert_called_once_with({'test': np.mean}, np.sum)
-    mock2.update_agg_funcs.assert_called_once_with({'test': np.mean}, np.sum)
+    logger.update_agg_funcs({"test": np.mean}, np.sum)
+    mock1.update_agg_funcs.assert_called_once_with({"test": np.mean}, np.sum)
+    mock2.update_agg_funcs.assert_called_once_with({"test": np.mean}, np.sum)
 
-    logger.agg_and_log_metrics({'test': 2.0}, 4)
-    mock1.agg_and_log_metrics.assert_called_once_with({'test': 2.0}, 4)
-    mock2.agg_and_log_metrics.assert_called_once_with({'test': 2.0}, 4)
+    logger.agg_and_log_metrics({"test": 2.0}, 4)
+    mock1.agg_and_log_metrics.assert_called_once_with({"test": 2.0}, 4)
+    mock2.agg_and_log_metrics.assert_called_once_with({"test": 2.0}, 4)
 
     logger.close()
     mock1.close.assert_called_once()
@@ -63,7 +63,7 @@ class CustomLogger(LightningLoggerBase):
 
     @property
     def experiment(self):
-        return 'test'
+        return "test"
 
     @rank_zero_only
     def log_hyperparams(self, params):
@@ -104,7 +104,7 @@ def test_custom_logger(tmpdir):
         def training_step(self, batch, batch_idx):
             output = self.layer(batch)
             loss = self.loss(batch, output)
-            self.log('train_loss', loss)
+            self.log("train_loss", loss)
             return {"loss": loss}
 
     logger = CustomLogger()
@@ -130,7 +130,7 @@ def test_multiple_loggers(tmpdir):
         def training_step(self, batch, batch_idx):
             output = self.layer(batch)
             loss = self.loss(batch, output)
-            self.log('train_loss', loss)
+            self.log("train_loss", loss)
             return {"loss": loss}
 
     model = CustomModel()
@@ -188,11 +188,17 @@ def test_adding_step_key(tmpdir):
 
         def training_epoch_end(self, outputs):
             self.logger.logged_step += 1
-            self.log_dict({"step": self.logger.logged_step, "train_acc": self.logger.logged_step / 10})
+            self.log_dict({
+                "step": self.logger.logged_step,
+                "train_acc": self.logger.logged_step / 10,
+            })
 
         def validation_epoch_end(self, outputs):
             self.logger.logged_step += 1
-            self.log_dict({"step": self.logger.logged_step, "val_acc": self.logger.logged_step / 10})
+            self.log_dict({
+                "step": self.logger.logged_step,
+                "val_acc": self.logger.logged_step / 10,
+            })
 
     model = CustomModel()
     trainer = Trainer(
@@ -225,27 +231,34 @@ def test_with_accumulate_grad_batches():
 
     np.random.seed(42)
     for i, loss in enumerate(np.random.random(10)):
-        logger.agg_and_log_metrics({'loss': loss}, step=int(i / 5))
+        logger.agg_and_log_metrics({"loss": loss}, step=int(i / 5))
 
-    assert logger.history == {0: {'loss': 0.5623850983416314}}
+    assert logger.history == {0: {"loss": 0.5623850983416314}}
     logger.close()
-    assert logger.history == {0: {'loss': 0.5623850983416314}, 1: {'loss': 0.4778883735637184}}
+    assert logger.history == {
+        0: {
+            "loss": 0.5623850983416314
+        },
+        1: {
+            "loss": 0.4778883735637184
+        },
+    }
 
 
 def test_dummyexperiment_support_indexing():
-    """ Test that the DummyExperiment can imitate indexing the experiment in a LoggerCollection. """
+    """Test that the DummyExperiment can imitate indexing the experiment in a LoggerCollection."""
     experiment = DummyExperiment()
     assert experiment[0] == experiment
 
 
 def test_dummylogger_support_indexing():
-    """ Test that the DummyLogger can imitate indexing of a LoggerCollection. """
+    """Test that the DummyLogger can imitate indexing of a LoggerCollection."""
     logger = DummyLogger()
     assert logger[0] == logger
 
 
 def test_dummylogger_noop_method_calls():
-    """ Test that the DummyLogger methods can be called with arbitrary arguments. """
+    """Test that the DummyLogger methods can be called with arbitrary arguments."""
     logger = DummyLogger()
     logger.log_hyperparams("1", 2, three="three")
     logger.log_metrics("1", 2, three="three")

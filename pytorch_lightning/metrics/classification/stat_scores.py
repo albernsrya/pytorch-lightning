@@ -42,6 +42,15 @@ class StatScores(_StatScores):
             Use :class:`~torchmetrics.StatScores`. Will be removed in v1.5.0.
         """
         void(
-            threshold, top_k, reduce, num_classes, ignore_index, mdmc_reduce, is_multiclass, compute_on_step,
-            dist_sync_on_step, process_group, dist_sync_fn
+            threshold,
+            top_k,
+            reduce,
+            num_classes,
+            ignore_index,
+            mdmc_reduce,
+            is_multiclass,
+            compute_on_step,
+            dist_sync_on_step,
+            process_group,
+            dist_sync_fn,
         )

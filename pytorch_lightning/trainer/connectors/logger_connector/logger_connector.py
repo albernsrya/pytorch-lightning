@@ -29,7 +29,7 @@ from pytorch_lightning.utilities.types import _EVALUATE_OUTPUT
 
 class LoggerConnector:
 
-    def __init__(self, trainer: 'pl.Trainer', log_gpu_memory: Optional[str] = None) -> None:
+    def __init__(self, trainer: "pl.Trainer", log_gpu_memory: Optional[str] = None) -> None:
         self.trainer = trainer
         self.log_gpu_memory = log_gpu_memory
         self.eval_loop_results = []
@@ -67,11 +67,13 @@ class LoggerConnector:
 
     def configure_logger(self, logger: Union[bool, Iterable, LightningLoggerBase]) -> None:
         if logger is True:
-            version = os.environ.get('PL_EXP_VERSION', self.trainer.slurm_job_id)
+            version = os.environ.get("PL_EXP_VERSION", self.trainer.slurm_job_id)
 
             # default logger
             self.trainer.logger = TensorBoardLogger(
-                save_dir=self.trainer.default_root_dir, version=version, name='lightning_logs'
+                save_dir=self.trainer.default_root_dir,
+                version=version,
+                name="lightning_logs",
             )
         elif logger is False:
             self.trainer.logger = None
@@ -184,17 +186,17 @@ class LoggerConnector:
 
         # log results of evaluation
         if (
-            self.trainer.state.fn != TrainerFn.FITTING and self.trainer.evaluating and self.trainer.is_global_zero
-            and self.trainer.verbose_evaluate
+            self.trainer.state.fn != TrainerFn.FITTING and self.trainer.evaluating and self.trainer.is_global_zero and
+            self.trainer.verbose_evaluate
         ):
-            print('-' * 80)
+            print("-" * 80)
             for result_idx, results in enumerate(self.eval_loop_results):
-                print(f'DATALOADER:{result_idx} {self.trainer.state.stage.upper()} RESULTS')
+                print(f"DATALOADER:{result_idx} {self.trainer.state.stage.upper()} RESULTS")
                 pprint({
                     k: (v.item() if v.numel() == 1 else v.tolist()) if isinstance(v, torch.Tensor) else v
                     for k, v in results.items()
                 })
-                print('-' * 80)
+                print("-" * 80)
 
         results = self.eval_loop_results
         # clear mem
@@ -211,7 +213,7 @@ class LoggerConnector:
         self._split_idx = split_idx
 
     def update_train_step_metrics(self) -> None:
-        if self.trainer.fit_loop.should_accumulate() and self.trainer.lightning_module.automatic_optimization:
+        if (self.trainer.fit_loop.should_accumulate() and self.trainer.lightning_module.automatic_optimization):
             return
 
         # when metrics should be logged

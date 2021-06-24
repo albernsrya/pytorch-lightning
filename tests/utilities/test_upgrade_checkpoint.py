@@ -36,14 +36,14 @@ from pytorch_lightning.utilities.upgrade_checkpoint import upgrade_checkpoint
                     ModelCheckpoint: {
                         "best_model_score": 0.34
                     }
-                }
+                },
             },
         ),
         (
             {
                 "epoch": 1,
                 "global_step": 23,
-                "checkpoint_callback_best_model_score": 0.99
+                "checkpoint_callback_best_model_score": 0.99,
             },
             {
                 "epoch": 1,
@@ -52,23 +52,23 @@ from pytorch_lightning.utilities.upgrade_checkpoint import upgrade_checkpoint
                     ModelCheckpoint: {
                         "best_model_score": 0.99
                     }
-                }
+                },
             },
         ),
         (
             {
                 "epoch": 1,
                 "global_step": 23,
-                "checkpoint_callback_best_model_path": 'path'
+                "checkpoint_callback_best_model_path": "path",
             },
             {
                 "epoch": 1,
                 "global_step": 23,
                 "callbacks": {
                     ModelCheckpoint: {
-                        "best_model_path": 'path'
+                        "best_model_path": "path"
                     }
-                }
+                },
             },
         ),
         (
@@ -76,7 +76,7 @@ from pytorch_lightning.utilities.upgrade_checkpoint import upgrade_checkpoint
                 "epoch": 1,
                 "global_step": 23,
                 "early_stop_callback_wait": 2,
-                "early_stop_callback_patience": 4
+                "early_stop_callback_patience": 4,
             },
             {
                 "epoch": 1,
@@ -86,7 +86,7 @@ from pytorch_lightning.utilities.upgrade_checkpoint import upgrade_checkpoint
                         "wait_count": 2,
                         "patience": 4
                     }
-                }
+                },
             },
         ),
     ],

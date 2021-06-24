@@ -36,7 +36,7 @@ class PredictionDataLoaderLoop(DataLoaderLoop):
                 f"Found {return_predictions} with training_type_plugin {type(self.trainer.training_type_plugin)}."
             )
         # For non ``DDPSpawnPlugin`` plugin, the `return_predictions` is True by default unless user decide otherwise.
-        self._return_predictions = not is_ddp_spawn if return_predictions is None else return_predictions
+        self._return_predictions = (not is_ddp_spawn if return_predictions is None else return_predictions)
 
     @property
     def num_dataloaders(self) -> int:
@@ -71,7 +71,7 @@ class PredictionDataLoaderLoop(DataLoaderLoop):
     def skip(self) -> bool:
         return sum(self.max_batches) == 0
 
-    def connect(self, trainer: 'pl.Trainer', *args: Any, **kwargs: Any) -> None:
+    def connect(self, trainer: "pl.Trainer", *args: Any, **kwargs: Any) -> None:
         """Connects the loop with all necessary things (like trainer)"""
         super().connect(trainer, *args, **kwargs)
         self.epoch_loop.connect(trainer, *args, **kwargs)
@@ -94,7 +94,11 @@ class PredictionDataLoaderLoop(DataLoaderLoop):
         dl_max_batches = self.max_batches[self.current_dataloader_idx]
 
         dl_predictions, dl_batch_indices = self.epoch_loop.run(
-            dataloader_iter, self.current_dataloader_idx, dl_max_batches, self.num_dataloaders, self.return_predictions
+            dataloader_iter,
+            self.current_dataloader_idx,
+            dl_max_batches,
+            self.num_dataloaders,
+            self.return_predictions,
         )
         self.predictions.append(dl_predictions)
         self.epoch_batch_indices.append(dl_batch_indices)

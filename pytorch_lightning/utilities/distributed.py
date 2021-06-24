@@ -53,7 +53,7 @@ def rank_zero_only(fn):
 
 # TODO: this should be part of the cluster environment
 def _get_rank() -> int:
-    rank_keys = ('RANK', 'SLURM_PROCID', 'LOCAL_RANK')
+    rank_keys = ("RANK", "SLURM_PROCID", "LOCAL_RANK")
     for key in rank_keys:
         rank = os.environ.get(key)
         if rank is not None:
@@ -62,36 +62,38 @@ def _get_rank() -> int:
 
 
 # add the attribute to the function but don't overwrite in case Trainer has already set it
-rank_zero_only.rank = getattr(rank_zero_only, 'rank', _get_rank())
+rank_zero_only.rank = getattr(rank_zero_only, "rank", _get_rank())
 
 
 def rank_zero_warn(*args, stacklevel: int = 5, **kwargs):
     from pytorch_lightning.utilities.warnings import rank_zero_deprecation, rank_zero_warn
+
     rank_zero_deprecation(
-        '`pytorch_lightning.utilities.distributed.rank_zero_warn` has been moved to'
-        ' `pytorch_lightning.utilities.rank_zero_warn` in v1.3.7 and will be removed in v1.6'
+        "`pytorch_lightning.utilities.distributed.rank_zero_warn` has been moved to"
+        " `pytorch_lightning.utilities.rank_zero_warn` in v1.3.7 and will be removed in v1.6"
     )
     return rank_zero_warn(*args, stacklevel=stacklevel, **kwargs)
 
 
 def rank_zero_deprecation(*args, stacklevel: int = 5, **kwargs):
     from pytorch_lightning.utilities.warnings import rank_zero_deprecation
+
     rank_zero_deprecation(
-        '`pytorch_lightning.utilities.distributed.rank_zero_deprecation` has been moved to'
-        ' `pytorch_lightning.utilities.rank_zero_deprecation` in v1.3.7 and will be removed in v1.6'
+        "`pytorch_lightning.utilities.distributed.rank_zero_deprecation` has been moved to"
+        " `pytorch_lightning.utilities.rank_zero_deprecation` in v1.3.7 and will be removed in v1.6"
     )
     return rank_zero_deprecation(*args, stacklevel=stacklevel, **kwargs)
 
 
 def _info(*args, stacklevel: int = 2, **kwargs):
     if python_version() >= "3.8.0":
-        kwargs['stacklevel'] = stacklevel
+        kwargs["stacklevel"] = stacklevel
     log.info(*args, **kwargs)
 
 
 def _debug(*args, stacklevel: int = 2, **kwargs):
     if python_version() >= "3.8.0":
-        kwargs['stacklevel'] = stacklevel
+        kwargs["stacklevel"] = stacklevel
     log.debug(*args, **kwargs)
 
 
@@ -138,7 +140,7 @@ def gather_all_tensors(result: Union[torch.Tensor], group: Optional[Any] = None)
 def sync_ddp_if_available(
     result: Union[torch.Tensor],
     group: Optional[Any] = None,
-    reduce_op: Optional[Union[ReduceOp, str]] = None
+    reduce_op: Optional[Union[ReduceOp, str]] = None,
 ) -> torch.Tensor:
     """
     Function to reduce a tensor across worker processes during distributed training
@@ -151,7 +153,7 @@ def sync_ddp_if_available(
     Return:
         reduced value
     """
-    if torch.distributed.is_available() and torch.distributed.is_initialized() or tpu_distributed():
+    if (torch.distributed.is_available() and torch.distributed.is_initialized() or tpu_distributed()):
         return sync_ddp(result, group=group, reduce_op=reduce_op)
     return result
 
@@ -159,7 +161,7 @@ def sync_ddp_if_available(
 def sync_ddp(
     result: Union[torch.Tensor],
     group: Optional[Any] = None,
-    reduce_op: Optional[Union[ReduceOp, str]] = None
+    reduce_op: Optional[Union[ReduceOp, str]] = None,
 ) -> torch.Tensor:
     """
     Function to reduce the tensors from several ddp processes to one master process
@@ -210,7 +212,12 @@ class AllGatherGrad(torch.autograd.Function):
     def backward(ctx, *grad_output):
         grad_output = torch.cat(grad_output)
 
-        torch.distributed.all_reduce(grad_output, op=torch.distributed.ReduceOp.SUM, async_op=False, group=ctx.group)
+        torch.distributed.all_reduce(
+            grad_output,
+            op=torch.distributed.ReduceOp.SUM,
+            async_op=False,
+            group=ctx.group,
+        )
 
         return grad_output[torch.distributed.get_rank()], None
 
@@ -317,6 +324,7 @@ def register_ddp_comm_hook(
         )
     """
     from pytorch_lightning.utilities import rank_zero_warn
+
     if not _TORCH_GREATER_EQUAL_1_8:
         rank_zero_warn("Not registering DDP comm hook. To use communication hooks, please use pytorch>=1.8.0.")
         return

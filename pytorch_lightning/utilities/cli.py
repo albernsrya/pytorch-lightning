@@ -25,6 +25,7 @@ from pytorch_lightning.utilities.seed import seed_everything
 _JSONARGPARSE_AVAILABLE = _module_available("jsonargparse")
 if _JSONARGPARSE_AVAILABLE:
     from jsonargparse import ActionConfigFile, ArgumentParser, set_config_read_mode
+
     set_config_read_mode(fsspec_enabled=True)
 else:
     ArgumentParser = object
@@ -41,20 +42,22 @@ class LightningArgumentParser(ArgumentParser):
         """
         if not _JSONARGPARSE_AVAILABLE:
             raise ModuleNotFoundError(
-                '`jsonargparse` is not installed but it is required for the CLI.'
-                ' Install it with `pip install jsonargparse[signatures]`.'
+                "`jsonargparse` is not installed but it is required for the CLI."
+                " Install it with `pip install jsonargparse[signatures]`."
             )
         super().__init__(*args, parse_as_dict=parse_as_dict, **kwargs)
         self.add_argument(
-            '--config', action=ActionConfigFile, help='Path to a configuration file in json or yaml format.'
+            "--config",
+            action=ActionConfigFile,
+            help="Path to a configuration file in json or yaml format.",
         )
         self.callback_keys: List[str] = []
 
     def add_lightning_class_args(
         self,
-        lightning_class: Union[Type[Trainer], Type[LightningModule], Type[LightningDataModule], Type[Callback]],
+        lightning_class: Union[Type[Trainer], Type[LightningModule], Type[LightningDataModule], Type[Callback], ],
         nested_key: str,
-        subclass_mode: bool = False
+        subclass_mode: bool = False,
     ) -> List[str]:
         """
         Adds arguments from a lightning class to a nested key of the parser
@@ -101,10 +104,10 @@ class SaveConfigCallback(Callback):
         config_path = os.path.join(log_dir, self.config_filename)
         if not self.overwrite and os.path.isfile(config_path):
             raise RuntimeError(
-                f'{self.__class__.__name__} expected {config_path} to NOT exist. Aborting to avoid overwriting'
-                ' results of a previous run. You can delete the previous config file,'
-                ' set `LightningCLI(save_config_callback=None)` to disable config saving,'
-                ' or set `LightningCLI(save_config_overwrite=True)` to overwrite the config file.'
+                f"{self.__class__.__name__} expected {config_path} to NOT exist. Aborting to avoid overwriting"
+                " results of a previous run. You can delete the previous config file,"
+                " set `LightningCLI(save_config_callback=None)` to disable config saving,"
+                " or set `LightningCLI(save_config_overwrite=True)` to overwrite the config file."
             )
         self.parser.save(self.config, config_path, skip_none=False, overwrite=self.overwrite)
 
@@ -117,17 +120,17 @@ class LightningCLI:
         model_class: Type[LightningModule],
         datamodule_class: Type[LightningDataModule] = None,
         save_config_callback: Optional[Type[SaveConfigCallback]] = SaveConfigCallback,
-        save_config_filename: str = 'config.yaml',
+        save_config_filename: str = "config.yaml",
         save_config_overwrite: bool = False,
         trainer_class: Type[Trainer] = Trainer,
         trainer_defaults: Dict[str, Any] = None,
         seed_everything_default: int = None,
-        description: str = 'pytorch-lightning trainer command line tool',
-        env_prefix: str = 'PL',
+        description: str = "pytorch-lightning trainer command line tool",
+        env_prefix: str = "PL",
         env_parse: bool = False,
         parser_kwargs: Dict[str, Any] = None,
         subclass_mode_model: bool = False,
-        subclass_mode_data: bool = False
+        subclass_mode_data: bool = False,
     ) -> None:
         """
         Receives as input pytorch-lightning classes, which are instantiated
@@ -187,14 +190,18 @@ class LightningCLI:
         self.subclass_mode_model = subclass_mode_model
         self.subclass_mode_data = subclass_mode_data
         self.parser_kwargs = {} if parser_kwargs is None else parser_kwargs
-        self.parser_kwargs.update({'description': description, 'env_prefix': env_prefix, 'default_env': env_parse})
+        self.parser_kwargs.update({
+            "description": description,
+            "env_prefix": env_prefix,
+            "default_env": env_parse,
+        })
 
         self.init_parser()
         self.add_core_arguments_to_parser()
         self.add_arguments_to_parser(self.parser)
         self.parse_arguments()
-        if self.config['seed_everything'] is not None:
-            seed_everything(self.config['seed_everything'], workers=True)
+        if self.config["seed_everything"] is not None:
+            seed_everything(self.config["seed_everything"], workers=True)
         self.before_instantiate_classes()
         self.instantiate_classes()
         self.prepare_fit_kwargs()
@@ -209,17 +216,17 @@ class LightningCLI:
     def add_core_arguments_to_parser(self) -> None:
         """Adds arguments from the core classes to the parser"""
         self.parser.add_argument(
-            '--seed_everything',
+            "--seed_everything",
             type=Optional[int],
             default=self.seed_everything_default,
-            help='Set to an int to run seed_everything with this value before classes instantiation',
+            help="Set to an int to run seed_everything with this value before classes instantiation",
         )
-        self.parser.add_lightning_class_args(self.trainer_class, 'trainer')
-        trainer_defaults = {'trainer.' + k: v for k, v in self.trainer_defaults.items() if k != 'callbacks'}
+        self.parser.add_lightning_class_args(self.trainer_class, "trainer")
+        trainer_defaults = {"trainer." + k: v for k, v in self.trainer_defaults.items() if k != "callbacks"}
         self.parser.set_defaults(trainer_defaults)
-        self.parser.add_lightning_class_args(self.model_class, 'model', subclass_mode=self.subclass_mode_model)
+        self.parser.add_lightning_class_args(self.model_class, "model", subclass_mode=self.subclass_mode_model)
         if self.datamodule_class is not None:
-            self.parser.add_lightning_class_args(self.datamodule_class, 'data', subclass_mode=self.subclass_mode_data)
+            self.parser.add_lightning_class_args(self.datamodule_class, "data", subclass_mode=self.subclass_mode_data)
 
     def add_arguments_to_parser(self, parser: LightningArgumentParser) -> None:
         """Implement to add extra arguments to parser or link arguments
@@ -238,33 +245,36 @@ class LightningCLI:
     def instantiate_classes(self) -> None:
         """Instantiates the classes using settings from self.config"""
         self.config_init = self.parser.instantiate_classes(self.config)
-        self.datamodule = self.config_init.get('data')
-        self.model = self.config_init['model']
+        self.datamodule = self.config_init.get("data")
+        self.model = self.config_init["model"]
         self.instantiate_trainer()
 
     def instantiate_trainer(self) -> None:
         """Instantiates the trainer using self.config_init['trainer']"""
-        if self.config_init['trainer'].get('callbacks') is None:
-            self.config_init['trainer']['callbacks'] = []
+        if self.config_init["trainer"].get("callbacks") is None:
+            self.config_init["trainer"]["callbacks"] = []
         callbacks = [self.config_init[c] for c in self.parser.callback_keys]
-        self.config_init['trainer']['callbacks'].extend(callbacks)
-        if 'callbacks' in self.trainer_defaults:
-            if isinstance(self.trainer_defaults['callbacks'], list):
-                self.config_init['trainer']['callbacks'].extend(self.trainer_defaults['callbacks'])
+        self.config_init["trainer"]["callbacks"].extend(callbacks)
+        if "callbacks" in self.trainer_defaults:
+            if isinstance(self.trainer_defaults["callbacks"], list):
+                self.config_init["trainer"]["callbacks"].extend(self.trainer_defaults["callbacks"])
             else:
-                self.config_init['trainer']['callbacks'].append(self.trainer_defaults['callbacks'])
-        if self.save_config_callback and not self.config_init['trainer']['fast_dev_run']:
+                self.config_init["trainer"]["callbacks"].append(self.trainer_defaults["callbacks"])
+        if (self.save_config_callback and not self.config_init["trainer"]["fast_dev_run"]):
             config_callback = self.save_config_callback(
-                self.parser, self.config, self.save_config_filename, overwrite=self.save_config_overwrite
+                self.parser,
+                self.config,
+                self.save_config_filename,
+                overwrite=self.save_config_overwrite,
             )
-            self.config_init['trainer']['callbacks'].append(config_callback)
-        self.trainer = self.trainer_class(**self.config_init['trainer'])
+            self.config_init["trainer"]["callbacks"].append(config_callback)
+        self.trainer = self.trainer_class(**self.config_init["trainer"])
 
     def prepare_fit_kwargs(self) -> None:
         """Prepares fit_kwargs including datamodule using self.config_init['data'] if given"""
-        self.fit_kwargs = {'model': self.model}
+        self.fit_kwargs = {"model": self.model}
         if self.datamodule is not None:
-            self.fit_kwargs['datamodule'] = self.datamodule
+            self.fit_kwargs["datamodule"] = self.datamodule
 
     def before_fit(self) -> None:
         """Implement to run some code before fit is started"""

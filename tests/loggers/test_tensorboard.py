@@ -63,11 +63,11 @@ def test_tensorboard_hparams_reload(tmpdir):
     event_acc.Reload()
 
     data_pt_1_5 = b'\x12\x1b"\x04\n\x02b1"\x04\n\x02b2*\r\n\x0b\x12\thp_metric'
-    data_pt_1_6 = b'\x12\x1f"\x06\n\x02b1 \x03"\x06\n\x02b2 \x03*\r\n\x0b\x12\thp_metric'
-    hparams_data = data_pt_1_6 if Version(torch.__version__) >= Version("1.6.0") else data_pt_1_5
+    data_pt_1_6 = (b'\x12\x1f"\x06\n\x02b1 \x03"\x06\n\x02b2 \x03*\r\n\x0b\x12\thp_metric')
+    hparams_data = (data_pt_1_6 if Version(torch.__version__) >= Version("1.6.0") else data_pt_1_5)
 
-    assert event_acc.summary_metadata['_hparams_/experiment'].plugin_data.plugin_name == 'hparams'
-    assert event_acc.summary_metadata['_hparams_/experiment'].plugin_data.content == hparams_data
+    assert (event_acc.summary_metadata["_hparams_/experiment"].plugin_data.plugin_name == "hparams")
+    assert (event_acc.summary_metadata["_hparams_/experiment"].plugin_data.content == hparams_data)
 
 
 def test_tensorboard_automatic_versioning(tmpdir):
@@ -97,7 +97,7 @@ def test_tensorboard_manual_versioning(tmpdir):
 
 
 def test_tensorboard_named_version(tmpdir):
-    """Verify that manual versioning works for string versions, e.g. '2020-02-05-162402' """
+    """Verify that manual versioning works for string versions, e.g. '2020-02-05-162402'"""
 
     name = "tb_versioning"
     (tmpdir / name).mkdir()
@@ -240,8 +240,8 @@ def test_tensorboard_log_omegaconf_hparams_and_metrics(tmpdir):
 
 @pytest.mark.parametrize("example_input_array", [None, torch.rand(2, 32)])
 def test_tensorboard_log_graph(tmpdir, example_input_array):
-    """ test that log graph works with both model.example_input_array and
-        if array is passed externaly
+    """test that log graph works with both model.example_input_array and
+    if array is passed externaly
     """
     model = BoringModel()
     if example_input_array is not None:
@@ -252,19 +252,19 @@ def test_tensorboard_log_graph(tmpdir, example_input_array):
 
 
 def test_tensorboard_log_graph_warning_no_example_input_array(tmpdir):
-    """ test that log graph throws warning if model.example_input_array is None """
+    """test that log graph throws warning if model.example_input_array is None"""
     model = BoringModel()
     model.example_input_array = None
     logger = TensorBoardLogger(tmpdir, log_graph=True)
     with pytest.warns(
         UserWarning,
-        match='Could not log computational graph since the `model.example_input_array`'
-        ' attribute is not set or `input_array` was not given'
+        match="Could not log computational graph since the `model.example_input_array`"
+        " attribute is not set or `input_array` was not given",
     ):
         logger.log_graph(model)
 
 
-@mock.patch('pytorch_lightning.loggers.TensorBoardLogger.log_metrics')
+@mock.patch("pytorch_lightning.loggers.TensorBoardLogger.log_metrics")
 def test_tensorboard_with_accummulated_gradients(mock_log_metrics, tmpdir):
     """Tests to ensure that tensorboard log properly when accumulated_gradients > 1"""
 
@@ -275,7 +275,7 @@ def test_tensorboard_with_accummulated_gradients(mock_log_metrics, tmpdir):
             self.indexes = []
 
         def training_step(self, *args):
-            self.log('foo', 1, on_step=True, on_epoch=True)
+            self.log("foo", 1, on_step=True, on_epoch=True)
             if not self.trainer.fit_loop.should_accumulate():
                 if self.trainer.logger_connector.should_update_logs:
                     self.indexes.append(self.trainer.global_step)
@@ -303,9 +303,9 @@ def test_tensorboard_with_accummulated_gradients(mock_log_metrics, tmpdir):
     assert count_steps == model.indexes
 
 
-@mock.patch('pytorch_lightning.loggers.tensorboard.SummaryWriter')
+@mock.patch("pytorch_lightning.loggers.tensorboard.SummaryWriter")
 def test_tensorboard_finalize(summary_writer, tmpdir):
-    """ Test that the SummaryWriter closes in finalize. """
+    """Test that the SummaryWriter closes in finalize."""
     logger = TensorBoardLogger(save_dir=tmpdir)
     logger.finalize("any")
     summary_writer().flush.assert_called()
@@ -324,20 +324,20 @@ def test_tensorboard_save_hparams_to_yaml_once(tmpdir):
     assert not os.path.isfile(os.path.join(tmpdir, hparams_file))
 
 
-@mock.patch('pytorch_lightning.loggers.tensorboard.log')
+@mock.patch("pytorch_lightning.loggers.tensorboard.log")
 def test_tensorboard_with_symlink(log, tmpdir):
     """
     Tests a specific failure case when tensorboard logger is used with empty name, symbolic link ``save_dir``, and
     relative paths.
     """
     os.chdir(tmpdir)  # need to use relative paths
-    source = os.path.join('.', 'lightning_logs')
-    dest = os.path.join('.', 'sym_lightning_logs')
+    source = os.path.join(".", "lightning_logs")
+    dest = os.path.join(".", "sym_lightning_logs")
 
     os.makedirs(source, exist_ok=True)
     os.symlink(source, dest)
 
-    logger = TensorBoardLogger(save_dir=dest, name='')
+    logger = TensorBoardLogger(save_dir=dest, name="")
     _ = logger.version
 
     log.warning.assert_not_called()
@@ -352,4 +352,4 @@ def test_tensorboard_missing_folder_warning(tmpdir, caplog):
     with caplog.at_level(logging.WARNING):
         assert logger.version == 0
 
-    assert 'Missing logger folder:' in caplog.text
+    assert "Missing logger folder:" in caplog.text

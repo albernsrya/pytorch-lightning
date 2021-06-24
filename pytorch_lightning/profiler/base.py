@@ -113,7 +113,10 @@ class BaseProfiler(AbstractProfiler):
             log.info(*args, **kwargs)
 
     def _prepare_filename(
-        self, action_name: Optional[str] = None, extension: str = ".txt", split_token: str = "-"
+        self,
+        action_name: Optional[str] = None,
+        extension: str = ".txt",
+        split_token: str = "-",
     ) -> str:
         args = []
         if self._stage is not None:

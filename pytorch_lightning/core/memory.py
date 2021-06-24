@@ -117,12 +117,12 @@ class LayerSummary(object):
 
     @property
     def layer_type(self) -> str:
-        """ Returns the class name of the module. """
+        """Returns the class name of the module."""
         return str(self._module.__class__.__name__)
 
     @property
     def num_parameters(self) -> int:
-        """ Returns the number of parameters in this module. """
+        """Returns the number of parameters in this module."""
         return sum(np.prod(p.shape) if not _is_lazy_weight_tensor(p) else 0 for p in self._module.parameters())
 
 
@@ -193,7 +193,7 @@ class ModelSummary(object):
         self._layer_summary = self.summarize()
         # 1 byte -> 8 bits
         # TODO: how do we compute precisin_megabytes in case of mixed precision?
-        precision = self._model.precision if isinstance(self._model.precision, int) else 32
+        precision = (self._model.precision if isinstance(self._model.precision, int) else 32)
         self._precision_megabytes = (precision / 8.0) * 1e-6
 
     @property
@@ -252,14 +252,14 @@ class ModelSummary(object):
         return summary
 
     def _forward_example_input(self) -> None:
-        """ Run the example input through each layer to get input- and output sizes. """
+        """Run the example input through each layer to get input- and output sizes."""
         model = self._model
         trainer = self._model.trainer
 
         input_ = model.example_input_array
         input_ = model._apply_batch_transfer_handler(input_)
 
-        if trainer is not None and trainer.amp_backend == AMPType.NATIVE and trainer._device_type != DeviceType.TPU:
+        if (trainer is not None and trainer.amp_backend == AMPType.NATIVE and trainer._device_type != DeviceType.TPU):
             model.forward = torch.cuda.amp.autocast()(model.forward)
 
         mode = model.training
@@ -353,7 +353,7 @@ def _format_summary_table(total_parameters: int, trainable_parameters: int, mode
 
 
 def get_memory_profile(mode: str) -> Union[Dict[str, int], Dict[int, int]]:
-    """ Get a profile of the current memory usage.
+    """Get a profile of the current memory usage.
 
     Args:
         mode: There are two modes:
@@ -389,7 +389,11 @@ def get_gpu_memory_map() -> Dict[str, int]:
         values are memory usage as integers in MB.
     """
     result = subprocess.run(
-        [shutil.which("nvidia-smi"), "--query-gpu=memory.used", "--format=csv,nounits,noheader"],
+        [
+            shutil.which("nvidia-smi"),
+            "--query-gpu=memory.used",
+            "--format=csv,nounits,noheader",
+        ],
         encoding="utf-8",
         # capture_output=True,          # valid for python version >=3.7
         stdout=subprocess.PIPE,
@@ -450,6 +454,7 @@ def get_human_readable_count(number: int) -> str:
 def _is_lazy_weight_tensor(p: Tensor) -> bool:
     if _TORCH_GREATER_EQUAL_1_8:
         from torch.nn.parameter import UninitializedParameter
+
         if isinstance(p, UninitializedParameter):
             warning_cache.warn(
                 "A layer with UninitializedParameter was found. "

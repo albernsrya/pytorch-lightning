@@ -13,11 +13,12 @@ from tests.helpers.boring_model import BoringModel
 
 
 def test_unsupported_precision_plugins():
-    """ Test error messages are raised for unsupported precision plugins with CPU. """
+    """Test error messages are raised for unsupported precision plugins with CPU."""
     trainer = Mock()
     model = Mock()
     accelerator = CPUAccelerator(
-        training_type_plugin=SingleDevicePlugin(torch.device("cpu")), precision_plugin=MixedPrecisionPlugin()
+        training_type_plugin=SingleDevicePlugin(torch.device("cpu")),
+        precision_plugin=MixedPrecisionPlugin(),
     )
     with pytest.raises(MisconfigurationException, match=r"AMP \+ CPU is not supported"):
         accelerator.setup(trainer=trainer, model=model)
@@ -49,7 +50,11 @@ def test_plugin_setup_optimizers_in_pre_dispatch(tmpdir, delay_dispatch):
             return delay_dispatch
 
     model = TestModel()
-    trainer = Trainer(default_root_dir=tmpdir, fast_dev_run=True, plugins=CustomPlugin(device=torch.device("cpu")))
+    trainer = Trainer(
+        default_root_dir=tmpdir,
+        fast_dev_run=True,
+        plugins=CustomPlugin(device=torch.device("cpu")),
+    )
     trainer.fit(model)
 
 
@@ -71,7 +76,7 @@ def test_accelerator_on_reset_dataloader_hooks(tmpdir):
 
         def on_reset_val_dataloader(self, dataloader):
             self.val_count += 1
-            assert self.lightning_module.trainer.training or self.lightning_module.trainer.validating
+            assert (self.lightning_module.trainer.training or self.lightning_module.trainer.validating)
             return super().on_reset_val_dataloader(dataloader)
 
         def on_reset_test_dataloader(self, dataloader):
@@ -85,7 +90,7 @@ def test_accelerator_on_reset_dataloader_hooks(tmpdir):
             return super().on_reset_predict_dataloader(dataloader)
 
     model = BoringModel()
-    accelerator = CustomAccelerator(PrecisionPlugin(), SingleDevicePlugin(device=torch.device('cpu')))
+    accelerator = CustomAccelerator(PrecisionPlugin(), SingleDevicePlugin(device=torch.device("cpu")))
     trainer = Trainer(default_root_dir=tmpdir, fast_dev_run=True, accelerator=accelerator)
     trainer.fit(model)
     trainer.validate(model)
@@ -97,7 +102,7 @@ def test_accelerator_on_reset_dataloader_hooks(tmpdir):
     assert accelerator.test_count == 1
     assert accelerator.predict_count == 1
 
-    accelerator = CustomAccelerator(PrecisionPlugin(), SingleDevicePlugin(device=torch.device('cpu')))
+    accelerator = CustomAccelerator(PrecisionPlugin(), SingleDevicePlugin(device=torch.device("cpu")))
     trainer = Trainer(default_root_dir=tmpdir, fast_dev_run=True, accelerator=accelerator)
     trainer.validate(model)
     trainer.test(model)
@@ -126,7 +131,7 @@ def test_plugin_on_reset_dataloader_hooks(tmpdir):
 
         def on_reset_val_dataloader(self, dataloader):
             self.val_count += 1
-            assert self.lightning_module.trainer.training or self.lightning_module.trainer.validating
+            assert (self.lightning_module.trainer.training or self.lightning_module.trainer.validating)
             return super().on_reset_val_dataloader(dataloader)
 
         def on_reset_test_dataloader(self, dataloader):
@@ -139,7 +144,7 @@ def test_plugin_on_reset_dataloader_hooks(tmpdir):
             assert self.lightning_module.trainer.predicting
             return super().on_reset_predict_dataloader(dataloader)
 
-    plugin = CustomPlugin(device=torch.device('cpu'))
+    plugin = CustomPlugin(device=torch.device("cpu"))
     model = BoringModel()
     trainer = Trainer(default_root_dir=tmpdir, fast_dev_run=True, plugins=plugin)
     trainer.fit(model)
@@ -151,7 +156,7 @@ def test_plugin_on_reset_dataloader_hooks(tmpdir):
     assert plugin.val_count == 1  # only called once during the entire session
     assert plugin.test_count == 1
     assert plugin.predict_count == 1
-    plugin = CustomPlugin(device=torch.device('cpu'))
+    plugin = CustomPlugin(device=torch.device("cpu"))
     trainer = Trainer(default_root_dir=tmpdir, fast_dev_run=True, plugins=plugin)
     trainer.validate(model)
     trainer.test(model)

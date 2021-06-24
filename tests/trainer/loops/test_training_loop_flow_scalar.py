@@ -25,7 +25,7 @@ from tests.helpers.utils import no_warning_call
 
 
 def test__training_step__flow_scalar(tmpdir):
-    """ Tests that only training_step can be used. """
+    """Tests that only training_step can be used."""
 
     class TestModel(DeterministicModel):
 
@@ -58,7 +58,7 @@ def test__training_step__flow_scalar(tmpdir):
 
 
 def test__training_step__tr_step_end__flow_scalar(tmpdir):
-    """ Tests that only training_step can be used. """
+    """Tests that only training_step can be used."""
 
     class TestModel(DeterministicModel):
 
@@ -71,7 +71,7 @@ def test__training_step__tr_step_end__flow_scalar(tmpdir):
 
         def training_step_end(self, tr_step_output):
             assert self.out == tr_step_output
-            assert self.count_num_graphs({'loss': tr_step_output}) == 1
+            assert self.count_num_graphs({"loss": tr_step_output}) == 1
             self.training_step_end_called = True
             return tr_step_output
 
@@ -98,7 +98,7 @@ def test__training_step__tr_step_end__flow_scalar(tmpdir):
 
 
 def test__training_step__epoch_end__flow_scalar(tmpdir):
-    """ Tests that only training_step can be used. """
+    """Tests that only training_step can be used."""
 
     class TestModel(DeterministicModel):
 
@@ -118,7 +118,7 @@ def test__training_step__epoch_end__flow_scalar(tmpdir):
             for b in outputs:
                 # time = 1
                 assert len(b) == 1
-                assert 'loss' in b
+                assert "loss" in b
                 assert isinstance(b, dict)
 
         def backward(self, loss, optimizer, optimizer_idx):
@@ -159,18 +159,20 @@ def test__training_step__epoch_end__flow_scalar(tmpdir):
     assert train_step_out.minimize.item() == 171
 
     # make sure the optimizer closure returns the correct things
-    opt_closure_result = trainer.fit_loop.training_loop.batch_loop.training_step_and_backward(
-        batch,
-        batch_idx,
-        0,
-        trainer.optimizers[0],
-        hiddens=None,
+    opt_closure_result = (
+        trainer.fit_loop.training_loop.batch_loop.training_step_and_backward(
+            batch,
+            batch_idx,
+            0,
+            trainer.optimizers[0],
+            hiddens=None,
+        )
     )
-    assert opt_closure_result['loss'].item() == 171
+    assert opt_closure_result["loss"].item() == 171
 
 
 def test__training_step__step_end__epoch_end__flow_scalar(tmpdir):
-    """ Checks train_step + training_step_end + training_epoch_end (all with scalar return from train_step). """
+    """Checks train_step + training_step_end + training_epoch_end (all with scalar return from train_step)."""
 
     class TestModel(DeterministicModel):
 
@@ -183,7 +185,7 @@ def test__training_step__step_end__epoch_end__flow_scalar(tmpdir):
 
         def training_step_end(self, tr_step_output):
             assert isinstance(tr_step_output, torch.Tensor)
-            assert self.count_num_graphs({'loss': tr_step_output}) == 1
+            assert self.count_num_graphs({"loss": tr_step_output}) == 1
             self.training_step_end_called = True
             return tr_step_output
 
@@ -196,7 +198,7 @@ def test__training_step__step_end__epoch_end__flow_scalar(tmpdir):
             for b in outputs:
                 # time = 1
                 assert len(b) == 1
-                assert 'loss' in b
+                assert "loss" in b
                 assert isinstance(b, dict)
 
         def backward(self, loss, optimizer, optimizer_idx):
@@ -237,21 +239,23 @@ def test__training_step__step_end__epoch_end__flow_scalar(tmpdir):
     assert train_step_out.minimize.item() == 171
 
     # make sure the optimizer closure returns the correct things
-    opt_closure_result = trainer.fit_loop.training_loop.batch_loop.training_step_and_backward(
-        batch, batch_idx, 0, trainer.optimizers[0], hiddens=None
+    opt_closure_result = (
+        trainer.fit_loop.training_loop.batch_loop.training_step_and_backward(
+            batch, batch_idx, 0, trainer.optimizers[0], hiddens=None
+        )
     )
-    assert opt_closure_result['loss'].item() == 171
+    assert opt_closure_result["loss"].item() == 171
 
 
 def test_train_step_no_return(tmpdir):
-    """ Tests that only training_step raises a warning when nothing is returned in case of automatic_optimization. """
+    """Tests that only training_step raises a warning when nothing is returned in case of automatic_optimization."""
 
     class TestModel(BoringModel):
 
         def training_step(self, batch, batch_idx):
             self.training_step_called = True
             loss = self.step(batch[0])
-            self.log('a', loss, on_step=True, on_epoch=True)
+            self.log("a", loss, on_step=True, on_epoch=True)
 
         def training_epoch_end(self, outputs) -> None:
             assert len(outputs) == 0
@@ -270,7 +274,7 @@ def test_train_step_no_return(tmpdir):
 
     trainer = Trainer(**trainer_args)
 
-    with pytest.warns(UserWarning, match=r'training_step returned None.*'):
+    with pytest.warns(UserWarning, match=r"training_step returned None.*"):
         trainer.fit(model)
 
     assert model.training_step_called
@@ -280,19 +284,19 @@ def test_train_step_no_return(tmpdir):
     model.automatic_optimization = False
     trainer = Trainer(**trainer_args)
 
-    with no_warning_call(UserWarning, match=r'training_step returned None.*'):
+    with no_warning_call(UserWarning, match=r"training_step returned None.*"):
         trainer.fit(model)
 
 
 def test_training_step_no_return_when_even(tmpdir):
-    """ Tests correctness when some training steps have been skipped. """
+    """Tests correctness when some training steps have been skipped."""
 
     class TestModel(BoringModel):
 
         def training_step(self, batch, batch_idx):
             self.training_step_called = True
             loss = self.step(batch[0])
-            self.log('a', loss, on_step=True, on_epoch=True)
+            self.log("a", loss, on_step=True, on_epoch=True)
             return loss if batch_idx % 2 else None
 
     model = TestModel()
@@ -306,7 +310,7 @@ def test_training_step_no_return_when_even(tmpdir):
         checkpoint_callback=False,
     )
 
-    with pytest.warns(UserWarning, match=r'.*training_step returned None.*'):
+    with pytest.warns(UserWarning, match=r".*training_step returned None.*"):
         trainer.fit(model)
 
     trainer.state.stage = RunningStage.TRAINING
@@ -320,7 +324,7 @@ def test_training_step_no_return_when_even(tmpdir):
 
 
 def test_training_step_none_batches(tmpdir):
-    """ Tests correctness when the train dataloader gives None for some steps. """
+    """Tests correctness when the train dataloader gives None for some steps."""
 
     class TestModel(BoringModel):
 
@@ -351,7 +355,7 @@ def test_training_step_none_batches(tmpdir):
         checkpoint_callback=False,
     )
 
-    with pytest.warns(UserWarning, match=r'.*train_dataloader yielded None.*'):
+    with pytest.warns(UserWarning, match=r".*train_dataloader yielded None.*"):
         trainer.fit(model)
 
     trainer.state.stage = RunningStage.TRAINING

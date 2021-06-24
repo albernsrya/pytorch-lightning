@@ -89,6 +89,6 @@ def main_train(dir_path, max_epochs: int = 5):
     trainer.fit(model)
 
 
-if __name__ == '__main__':
-    path_dir = os.path.join(PATH_LEGACY, 'checkpoints', str(pl.__version__))
+if __name__ == "__main__":
+    path_dir = os.path.join(PATH_LEGACY, "checkpoints", str(pl.__version__))
     main_train(path_dir)

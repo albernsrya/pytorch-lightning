@@ -87,7 +87,7 @@ class DDPPlugin(ParallelPlugin):
             )
         self._sync_batchnorm = sync_batchnorm or False
         self.dist = LightningDistributed()
-        self.num_processes = len(self.parallel_devices) if self.parallel_devices is not None else 0
+        self.num_processes = (len(self.parallel_devices) if self.parallel_devices is not None else 0)
         self._ddp_kwargs = kwargs
         self._has_spawned_children = False
         self.task_idx = None
@@ -133,7 +133,7 @@ class DDPPlugin(ParallelPlugin):
 
     def setup_environment(self) -> None:
         # start the other scripts
-        if not self.cluster_environment.creates_children() and os.environ.get("PL_IN_DDP_SUBPROCESS", "0") != "1":
+        if (not self.cluster_environment.creates_children() and os.environ.get("PL_IN_DDP_SUBPROCESS", "0") != "1"):
             self._call_children_scripts()
 
         # set the task idx
@@ -200,7 +200,7 @@ class DDPPlugin(ParallelPlugin):
                 env_copy["PL_EXP_VERSION"] = str(self.lightning_module.logger.version)
 
             # remove env var if global seed not set
-            if os.environ.get("PL_GLOBAL_SEED") is None and "PL_GLOBAL_SEED" in env_copy:
+            if (os.environ.get("PL_GLOBAL_SEED") is None and "PL_GLOBAL_SEED" in env_copy):
                 del env_copy["PL_GLOBAL_SEED"]
 
             # start process
@@ -210,7 +210,10 @@ class DDPPlugin(ParallelPlugin):
                 if HydraConfig.initialized():
                     cwd = get_original_cwd()
                     os_cwd = f'"{os.getcwd()}"'
-                    command += [f'hydra.run.dir={os_cwd}', f'hydra.job.name=train_ddp_process_{local_rank}']
+                    command += [
+                        f"hydra.run.dir={os_cwd}",
+                        f"hydra.job.name=train_ddp_process_{local_rank}",
+                    ]
             proc = subprocess.Popen(command, env=env_copy, cwd=cwd)
             self.interactive_ddp_procs.append(proc)
 
@@ -265,8 +268,9 @@ class DDPPlugin(ParallelPlugin):
         # This flag does come with a performance hit, so it is suggested to disable in cases where it is possible.
         self._ddp_kwargs["find_unused_parameters"] = self._ddp_kwargs.get("find_unused_parameters", True)
         # todo: PyTorch 1.7.0 DDP introduces ``self.reducer._rebuild_buckets()`` breaking manual_optimization
-        if _TORCH_GREATER_EQUAL_1_7 and not self.lightning_module.automatic_optimization and not self._ddp_kwargs.get(
-            "find_unused_parameters", False
+        if (
+            _TORCH_GREATER_EQUAL_1_7 and not self.lightning_module.automatic_optimization and
+            not self._ddp_kwargs.get("find_unused_parameters", False)
         ):
             rank_zero_warn(
                 "From PyTorch 1.7.0, Lightning ``manual_optimization`` needs to set ``find_unused_parameters=True`` "
@@ -300,8 +304,8 @@ class DDPPlugin(ParallelPlugin):
         return [self.root_device.index]
 
     def init_ddp_connection(self, global_rank: Optional[int] = None, world_size: Optional[int] = None) -> None:
-        global_rank = global_rank if global_rank is not None else self.cluster_environment.global_rank()
-        world_size = world_size if world_size is not None else self.cluster_environment.world_size()
+        global_rank = (global_rank if global_rank is not None else self.cluster_environment.global_rank())
+        world_size = (world_size if world_size is not None else self.cluster_environment.world_size())
         os.environ["MASTER_ADDR"] = self.cluster_environment.master_address()
         os.environ["MASTER_PORT"] = str(self.cluster_environment.master_port())
         if not torch.distributed.is_initialized():
@@ -329,7 +333,13 @@ class DDPPlugin(ParallelPlugin):
     def broadcast(self, obj: object, src: int = 0) -> object:
         return self.dist.broadcast(obj)
 
-    def pre_backward(self, closure_loss: torch.Tensor, should_accumulate: bool, optimizer: Optimizer, opt_idx: int):
+    def pre_backward(
+        self,
+        closure_loss: torch.Tensor,
+        should_accumulate: bool,
+        optimizer: Optimizer,
+        opt_idx: int,
+    ):
         """Run before precision plugin executes backward"""
         if not self.lightning_module.automatic_optimization:
             prepare_for_backward(self.model, closure_loss)
@@ -339,7 +349,12 @@ class DDPPlugin(ParallelPlugin):
             torch.cuda.set_device(self.root_device)
         self.model.to(self.root_device)
 
-    def reduce(self, tensor, group: Optional[Any] = None, reduce_op: Union[ReduceOp, str] = "mean") -> torch.Tensor:
+    def reduce(
+        self,
+        tensor,
+        group: Optional[Any] = None,
+        reduce_op: Union[ReduceOp, str] = "mean",
+    ) -> torch.Tensor:
         """
         Reduces a tensor from several distributed processes to one aggregated tensor.
 
@@ -378,5 +393,5 @@ class DDPPlugin(ParallelPlugin):
             "ddp_find_unused_parameters_false",
             cls,
             description="DDP Plugin with `find_unused_parameters` as False",
-            find_unused_parameters=False
+            find_unused_parameters=False,
         )

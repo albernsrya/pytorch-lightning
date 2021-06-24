@@ -51,7 +51,7 @@ _PYTORCH_PRUNING_METHOD = {
 _PARAM_TUPLE = Tuple[nn.Module, str]
 _PARAM_LIST = Sequence[_PARAM_TUPLE]
 _MODULE_CONTAINERS = (LightningModule, nn.Sequential, nn.ModuleList, nn.ModuleDict)
-_LayerRef = TypedDict('_LayerRef', {'data': nn.Module, 'names': List[Tuple[int, str]]})
+_LayerRef = TypedDict("_LayerRef", {"data": nn.Module, "names": List[Tuple[int, str]]})
 
 
 class ModelPruning(Callback):
@@ -276,7 +276,7 @@ class ModelPruning(Callback):
     def _copy_param(new: nn.Module, old: nn.Module, name: str) -> None:
         dst = getattr(new, name)
         src = getattr(old, name)
-        if dst is None or src is None or not isinstance(dst, torch.Tensor) or not isinstance(src, torch.Tensor):
+        if (dst is None or src is None or not isinstance(dst, torch.Tensor) or not isinstance(src, torch.Tensor)):
             return
         dst.data = src.data.to(dst.device)
 
@@ -297,7 +297,7 @@ class ModelPruning(Callback):
         for d in self._original_layers.values():
             copy = d["data"]
             names = d["names"]
-            if self._resample_parameters and hasattr(copy, "reset_parameters") and callable(copy.reset_parameters):
+            if (self._resample_parameters and hasattr(copy, "reset_parameters") and callable(copy.reset_parameters)):
                 copy = deepcopy(copy)  # keep the original parameters
                 copy.reset_parameters()
             for i, name in names:
@@ -316,7 +316,9 @@ class ModelPruning(Callback):
 
     def _apply_global_pruning(self, amount: float) -> None:
         pytorch_prune.global_unstructured(
-            self._parameters_to_prune, pruning_method=self.pruning_fn, **self._resolve_global_kwargs(amount)
+            self._parameters_to_prune,
+            pruning_method=self.pruning_fn,
+            **self._resolve_global_kwargs(amount),
         )
 
     @staticmethod
@@ -328,7 +330,7 @@ class ModelPruning(Callback):
         return (mask == 0).sum().item(), mask.numel()
 
     def apply_pruning(self, amount: Union[int, float]) -> None:
-        """ Applies pruning to ``parameters_to_prune``. """
+        """Applies pruning to ``parameters_to_prune``."""
         if self._verbose:
             prev_stats = [self._get_pruned_stats(m, n) for m, n in self._parameters_to_prune]
 
@@ -343,7 +345,10 @@ class ModelPruning(Callback):
 
     @rank_zero_only
     def _log_sparsity_stats(
-        self, prev: List[Tuple[int, int]], curr: List[Tuple[int, int]], amount: Union[int, float] = 0
+        self,
+        prev: List[Tuple[int, int]],
+        curr: List[Tuple[int, int]],
+        amount: Union[int, float] = 0,
     ) -> None:
         total_params = sum(p.numel() for layer, _ in self._parameters_to_prune for p in layer.parameters())
         prev_total_zeros = sum(zeros for zeros, _ in prev)
@@ -363,7 +368,7 @@ class ModelPruning(Callback):
                     f" {curr_mask_zeros} ({curr_mask_zeros / curr_mask_size:.2%})"
                 )
 
-    def on_before_accelerator_backend_setup(self, trainer: 'pl.Trainer', pl_module: LightningModule) -> None:
+    def on_before_accelerator_backend_setup(self, trainer: "pl.Trainer", pl_module: LightningModule) -> None:
         parameters_to_prune = self.sanitize_parameters_to_prune(
             pl_module, self._parameters_to_prune, parameter_names=self._parameter_names
         )
@@ -380,7 +385,7 @@ class ModelPruning(Callback):
                 self._original_layers[id_]["names"].append((i, name))
 
     def _run_pruning(self, current_epoch: int) -> None:
-        prune = self._apply_pruning(current_epoch) if callable(self._apply_pruning) else self._apply_pruning
+        prune = (self._apply_pruning(current_epoch) if callable(self._apply_pruning) else self._apply_pruning)
         amount = self.amount(current_epoch) if callable(self.amount) else self.amount
         if not prune or not amount:
             return
@@ -392,24 +397,24 @@ class ModelPruning(Callback):
         ):
             self.apply_lottery_ticket_hypothesis()
 
-    def on_train_epoch_end(self, trainer: 'pl.Trainer', pl_module: LightningModule) -> None:  # type: ignore
+    def on_train_epoch_end(self, trainer: "pl.Trainer", pl_module: LightningModule) -> None:  # type: ignore
         if self._prune_on_train_epoch_end:
             rank_zero_debug("`ModelPruning.on_train_epoch_end`. Applying pruning")
             self._run_pruning(pl_module.current_epoch)
 
-    def on_validation_epoch_end(self, trainer: 'pl.Trainer', pl_module: 'pl.LightningModule') -> None:
+    def on_validation_epoch_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         if not trainer.sanity_checking and not self._prune_on_train_epoch_end:
             rank_zero_debug("`ModelPruning.on_validation_epoch_end`. Applying pruning")
             self._run_pruning(pl_module.current_epoch)
 
-    def on_train_end(self, trainer: 'pl.Trainer', pl_module: LightningModule) -> None:
+    def on_train_end(self, trainer: "pl.Trainer", pl_module: LightningModule) -> None:
         if self._make_pruning_permanent:
             rank_zero_debug("`ModelPruning.on_train_end`. Pruning is made permanent for this checkpoint")
             self.make_pruning_permanent(pl_module)
 
     def on_save_checkpoint(
         self,
-        trainer: 'pl.Trainer',
+        trainer: "pl.Trainer",
         pl_module: LightningModule,
         checkpoint: Dict[str, Any],
     ) -> Dict[str, Any]:
@@ -447,9 +452,9 @@ class ModelPruning(Callback):
             parameters_to_prune = [(m, p) for p in parameters for m in current_modules
                                    if getattr(m, p, None) is not None]
         elif (
-            isinstance(parameters_to_prune, (list, tuple)) and len(parameters_to_prune) > 0
-            and all(len(p) == 2 for p in parameters_to_prune)
-            and all(isinstance(a, nn.Module) and isinstance(b, str) for a, b in parameters_to_prune)
+            isinstance(parameters_to_prune, (list, tuple)) and len(parameters_to_prune) > 0 and
+            all(len(p) == 2 for p in parameters_to_prune) and
+            all(isinstance(a, nn.Module) and isinstance(b, str) for a, b in parameters_to_prune)
         ):
             missing_modules, missing_parameters = [], []
             for module, name in parameters_to_prune:

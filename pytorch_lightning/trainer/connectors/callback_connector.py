@@ -40,7 +40,7 @@ class CallbackConnector:
     ):
         # init folder paths for checkpoint + weights save callbacks
         self.trainer._default_root_dir = default_root_dir or os.getcwd()
-        self.trainer._weights_save_path = weights_save_path or self.trainer._default_root_dir
+        self.trainer._weights_save_path = (weights_save_path or self.trainer._default_root_dir)
         self.trainer._stochastic_weight_avg = stochastic_weight_avg
 
         # init callbacks
@@ -90,12 +90,13 @@ class CallbackConnector:
             return
 
         from pytorch_lightning.callbacks.stochastic_weight_avg import StochasticWeightAveraging
+
         existing_swa = [cb for cb in self.trainer.callbacks if isinstance(cb, StochasticWeightAveraging)]
         if not existing_swa:
             self.trainer.callbacks = [StochasticWeightAveraging()] + self.trainer.callbacks
 
     def configure_progress_bar(self, refresh_rate=None, process_position=0):
-        if os.getenv('COLAB_GPU') and refresh_rate is None:
+        if os.getenv("COLAB_GPU") and refresh_rate is None:
             # smaller refresh rate on colab causes crashes, choose a higher value
             refresh_rate = 20
         refresh_rate = 1 if refresh_rate is None else refresh_rate
@@ -103,8 +104,8 @@ class CallbackConnector:
         progress_bars = [c for c in self.trainer.callbacks if isinstance(c, ProgressBarBase)]
         if len(progress_bars) > 1:
             raise MisconfigurationException(
-                'You added multiple progress bar callbacks to the Trainer, but currently only one'
-                ' progress bar is supported.'
+                "You added multiple progress bar callbacks to the Trainer, but currently only one"
+                " progress bar is supported."
             )
         elif len(progress_bars) == 1:
             progress_bar_callback = progress_bars[0]

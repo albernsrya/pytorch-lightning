@@ -32,13 +32,20 @@ def test_training_type_plugins_registry_with_new_plugin():
     plugin_description = "Test Plugin"
 
     TrainingTypePluginsRegistry.register(
-        plugin_name, TestPlugin, description=plugin_description, param1="abc", param2=123
+        plugin_name,
+        TestPlugin,
+        description=plugin_description,
+        param1="abc",
+        param2=123,
     )
 
     assert plugin_name in TrainingTypePluginsRegistry
     assert TrainingTypePluginsRegistry[plugin_name]["description"] == plugin_description
-    assert TrainingTypePluginsRegistry[plugin_name]["init_params"] == {"param1": "abc", "param2": 123}
-    assert TrainingTypePluginsRegistry[plugin_name]["distributed_backend"] == "test_plugin"
+    assert TrainingTypePluginsRegistry[plugin_name]["init_params"] == {
+        "param1": "abc",
+        "param2": 123,
+    }
+    assert (TrainingTypePluginsRegistry[plugin_name]["distributed_backend"] == "test_plugin")
     assert isinstance(TrainingTypePluginsRegistry.get(plugin_name), TestPlugin)
 
     TrainingTypePluginsRegistry.remove(plugin_name)
@@ -59,11 +66,14 @@ def test_training_type_plugins_registry_with_new_plugin():
         ("deepspeed_stage_3", {
             "stage": 3
         }),
-        ("deepspeed_stage_3_offload", {
-            "stage": 3,
-            "offload_parameters": True,
-            "offload_optimizer": True
-        }),
+        (
+            "deepspeed_stage_3_offload",
+            {
+                "stage": 3,
+                "offload_parameters": True,
+                "offload_optimizer": True
+            },
+        ),
     ],
 )
 def test_training_type_plugins_registry_with_deepspeed_plugins(plugin_name, init_params):

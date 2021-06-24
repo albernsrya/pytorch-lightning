@@ -52,7 +52,7 @@ def test_v1_5_0_model_checkpoint_save_function():
         _ = model_ckpt.save_function
 
 
-@mock.patch('pytorch_lightning.loggers.wandb.wandb')
+@mock.patch("pytorch_lightning.loggers.wandb.wandb")
 def test_v1_5_0_wandb_unused_sync_step(_):
     with pytest.deprecated_call(match=r"v1.2.1 and will be removed in v1.5"):
         WandbLogger(sync_step=True)
@@ -185,7 +185,7 @@ def test_v1_5_0_legacy_profiler_argument():
 
 def test_v1_5_0_running_sanity_check():
     trainer = Trainer()
-    with pytest.deprecated_call(match='has been renamed to `Trainer.sanity_checking`'):
+    with pytest.deprecated_call(match="has been renamed to `Trainer.sanity_checking`"):
         assert not trainer.running_sanity_check
 
 
@@ -202,7 +202,10 @@ def test_old_training_step_signature_with_opt_idx_manual_opt(tmpdir):
             return super().training_step(batch, batch_idx)
 
         def configure_optimizers(self):
-            return [optim.SGD(self.parameters(), lr=1e-2), optim.SGD(self.parameters(), lr=1e-2)]
+            return [
+                optim.SGD(self.parameters(), lr=1e-2),
+                optim.SGD(self.parameters(), lr=1e-2),
+            ]
 
     model = OldSignatureModel()
     trainer = Trainer(default_root_dir=tmpdir, fast_dev_run=2)
@@ -348,7 +351,7 @@ def test_v1_5_0_lighting_module_grad_norm(tmpdir):
     condition=_compare_version("pytorch_lightning", operator.ge, "1.5"),
     reason="parsing of string will change in v1.5",
 )
-@mock.patch('torch.cuda.device_count', return_value=4)
+@mock.patch("torch.cuda.device_count", return_value=4)
 def test_v1_5_0_trainer_gpus_str_parsing(*_):
     # TODO: when removing this, make sure docs in docs/advanced/multi-gpu.rst reflect the new
     #   behavior regarding GPU selection. Ping @awaelchli if unsure.
@@ -370,6 +373,7 @@ def test_v1_5_0_datamodule_setter():
     with no_deprecated_call(match="The `LightningModule.datamodule`"):
         model.datamodule = datamodule
     from pytorch_lightning.core.lightning import warning_cache
+
     warning_cache.clear()
     _ = model.datamodule
     assert any("The `LightningModule.datamodule`" in w for w in warning_cache)
@@ -382,9 +386,12 @@ def test_v1_5_0_trainer_tbptt_steps(tmpdir):
 
 @RunIf(deepspeed=True)
 @pytest.mark.parametrize(
-    "params", [dict(cpu_offload=True),
-               dict(cpu_offload_params=True),
-               dict(cpu_offload_use_pin_memory=True)]
+    "params",
+    [
+        dict(cpu_offload=True),
+        dict(cpu_offload_params=True),
+        dict(cpu_offload_use_pin_memory=True),
+    ],
 )
 def test_v1_5_0_deepspeed_cpu_offload(tmpdir, params):
 

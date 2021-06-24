@@ -57,7 +57,7 @@ if _TORCH_GREATER_EQUAL_1_6:
                 "lr_scheduler": {
                     "scheduler": torch.optim.lr_scheduler.StepLR(optimizer, step_size=1),
                     "interval": self.interval,
-                }
+                },
             }
 
     class SwaTestCallback(StochasticWeightAveraging):
@@ -97,9 +97,9 @@ if _TORCH_GREATER_EQUAL_1_6:
             assert trainer.num_training_batches == 5
 
             # check backward call count. the batchnorm update epoch should not backward
-            assert trainer.dev_debugger.count_events(
-                "backward_call"
-            ) == trainer.max_epochs * trainer.limit_train_batches
+            assert (
+                trainer.dev_debugger.count_events("backward_call") == trainer.max_epochs * trainer.limit_train_batches
+            )
 
             # check call counts
             assert self.update_parameters_calls == trainer.max_epochs - (self._swa_epoch_start - 1)
@@ -107,7 +107,14 @@ if _TORCH_GREATER_EQUAL_1_6:
 
 
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})
-def train_with_swa(tmpdir, batchnorm=True, accelerator=None, gpus=None, num_processes=1, interval="epoch"):
+def train_with_swa(
+    tmpdir,
+    batchnorm=True,
+    accelerator=None,
+    gpus=None,
+    num_processes=1,
+    interval="epoch",
+):
     model = SwaTestModel(batchnorm=batchnorm, interval=interval)
     swa_start = 2
     max_epochs = 5
@@ -125,7 +132,7 @@ def train_with_swa(tmpdir, batchnorm=True, accelerator=None, gpus=None, num_proc
         accumulate_grad_batches=2,
         accelerator=accelerator,
         gpus=gpus,
-        num_processes=num_processes
+        num_processes=num_processes,
     )
     trainer.fit(model)
 
@@ -186,8 +193,8 @@ def test_swa_raises():
         StochasticWeightAveraging(swa_epoch_start=5, swa_lrs=[0.2, 1])
 
 
-@pytest.mark.parametrize('stochastic_weight_avg', [False, True])
-@pytest.mark.parametrize('use_callbacks', [False, True])
+@pytest.mark.parametrize("stochastic_weight_avg", [False, True])
+@pytest.mark.parametrize("use_callbacks", [False, True])
 @RunIf(min_torch="1.6.0")
 def test_trainer_and_stochastic_weight_avg(tmpdir, use_callbacks: bool, stochastic_weight_avg: bool):
     """Test to ensure SWA Callback is injected when `stochastic_weight_avg` is provided to the Trainer"""
@@ -209,7 +216,7 @@ def test_trainer_and_stochastic_weight_avg(tmpdir, use_callbacks: bool, stochast
     )
     trainer.fit(model)
     if use_callbacks or stochastic_weight_avg:
-        assert len([cb for cb in trainer.callbacks if isinstance(cb, StochasticWeightAveraging)]) == 1
+        assert (len([cb for cb in trainer.callbacks if isinstance(cb, StochasticWeightAveraging)]) == 1)
         assert trainer.callbacks[0]._swa_lrs == (1e-3 if use_callbacks else 0.1)
     else:
         assert all(not isinstance(cb, StochasticWeightAveraging) for cb in trainer.callbacks)

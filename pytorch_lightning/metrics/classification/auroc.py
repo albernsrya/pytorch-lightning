@@ -25,7 +25,7 @@ class AUROC(_AUROC):
         self,
         num_classes: Optional[int] = None,
         pos_label: Optional[int] = None,
-        average: Optional[str] = 'macro',
+        average: Optional[str] = "macro",
         max_fpr: Optional[float] = None,
         compute_on_step: bool = True,
         dist_sync_on_step: bool = False,
@@ -38,4 +38,13 @@ class AUROC(_AUROC):
         .. deprecated::
             Use :class:`~torchmetrics.AUROC`. Will be removed in v1.5.0.
         """
-        void(num_classes, pos_label, average, max_fpr, compute_on_step, dist_sync_on_step, process_group, dist_sync_fn)
+        void(
+            num_classes,
+            pos_label,
+            average,
+            max_fpr,
+            compute_on_step,
+            dist_sync_on_step,
+            process_group,
+            dist_sync_fn,
+        )

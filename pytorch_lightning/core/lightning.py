@@ -155,12 +155,12 @@ class LightningModule(
 
     @property
     def global_rank(self) -> int:
-        """ The index of the current process across all nodes and devices. """
+        """The index of the current process across all nodes and devices."""
         return self.trainer.global_rank if self.trainer else 0
 
     @property
     def local_rank(self) -> int:
-        """ The index of the current process within a single node. """
+        """The index of the current process within a single node."""
         return self.trainer.local_rank if self.trainer else 0
 
     @example_input_array.setter
@@ -213,16 +213,19 @@ class LightningModule(
 
     @property
     def logger(self):
-        """ Reference to the logger object in the Trainer. """
+        """Reference to the logger object in the Trainer."""
         return self.trainer.logger if self.trainer else None
 
     def _apply_batch_transfer_handler(
-        self, batch: Any, device: Optional[torch.device] = None, dataloader_idx: Optional[int] = None
+        self,
+        batch: Any,
+        device: Optional[torch.device] = None,
+        dataloader_idx: Optional[int] = None,
     ) -> Any:
         device = device or self.device
         batch = self.on_before_batch_transfer(batch, dataloader_idx)
 
-        if is_param_in_hook_signature(self.transfer_batch_to_device, 'dataloader_idx'):
+        if is_param_in_hook_signature(self.transfer_batch_to_device, "dataloader_idx"):
             batch = self.transfer_batch_to_device(batch, device, dataloader_idx)
         else:
             warning_cache.deprecation(
@@ -264,7 +267,7 @@ class LightningModule(
         logger: bool = True,
         on_step: Optional[bool] = None,
         on_epoch: Optional[bool] = None,
-        reduce_fx: Union[str, Callable] = 'default',  # TODO: change to 'mean' when `sync_dist_op` is removed in 1.6
+        reduce_fx: Union[str, Callable] = "default",  # TODO: change to 'mean' when `sync_dist_op` is removed in 1.6
         tbptt_reduce_fx: Optional = None,  # noqa: Remove in 1.6
         tbptt_pad_token: Optional = None,  # noqa: Remove in 1.6
         enable_graph: bool = False,
@@ -313,30 +316,35 @@ class LightningModule(
         """
         if tbptt_reduce_fx is not None:
             rank_zero_deprecation(
-                '`self.log(tbptt_reduce_fx=...)` is no longer supported. The flag will be removed in v1.6.'
-                ' Please, open a discussion explaining your use-case in'
-                ' `https://github.com/PyTorchLightning/pytorch-lightning/discussions`'
+                "`self.log(tbptt_reduce_fx=...)` is no longer supported. The flag will be removed in v1.6."
+                " Please, open a discussion explaining your use-case in"
+                " `https://github.com/PyTorchLightning/pytorch-lightning/discussions`"
             )
         if tbptt_pad_token is not None:
             rank_zero_deprecation(
-                '`self.log(tbptt_pad_token=...)` is no longer supported. The flag will be removed in v1.6.'
-                ' Please, open a discussion explaining your use-case in'
-                ' `https://github.com/PyTorchLightning/pytorch-lightning/discussions`'
+                "`self.log(tbptt_pad_token=...)` is no longer supported. The flag will be removed in v1.6."
+                " Please, open a discussion explaining your use-case in"
+                " `https://github.com/PyTorchLightning/pytorch-lightning/discussions`"
             )
         if sync_dist_op is not None:
             rank_zero_deprecation(
                 f"`self.log(sync_dist_op='{sync_dist_op}')` is deprecated and will be removed in v.1.6."
                 f" Use `self.log(reduce_fx={sync_dist_op})` instead."
             )
-            if reduce_fx == 'default':
+            if reduce_fx == "default":
                 reduce_fx = sync_dist_op
-        elif reduce_fx == 'default':
-            reduce_fx = 'mean'
+        elif reduce_fx == "default":
+            reduce_fx = "mean"
 
         # check for invalid values
         apply_to_collection(value, dict, self.__check_not_nested, name)
         apply_to_collection(
-            value, object, self.__check_allowed, name, value, wrong_dtype=(numbers.Number, Metric, Tensor, dict)
+            value,
+            object,
+            self.__check_allowed,
+            name,
+            value,
+            wrong_dtype=(numbers.Number, Metric, Tensor, dict),
         )
 
         # set the default depending on the fx_name
@@ -388,7 +396,7 @@ class LightningModule(
         logger: bool = True,
         on_step: Optional[bool] = None,
         on_epoch: Optional[bool] = None,
-        reduce_fx: Union[str, Callable] = 'default',  # TODO: change to 'mean' when `sync_dist_op` is removed in 1.6
+        reduce_fx: Union[str, Callable] = "default",  # TODO: change to 'mean' when `sync_dist_op` is removed in 1.6
         tbptt_reduce_fx: Optional[Any] = None,  # noqa: Remove in 1.6
         tbptt_pad_token: Optional[Any] = None,  # noqa: Remove in 1.6
         enable_graph: bool = False,
@@ -435,19 +443,19 @@ class LightningModule(
                 sync_dist_op=sync_dist_op,
                 tbptt_pad_token=tbptt_pad_token,
                 tbptt_reduce_fx=tbptt_reduce_fx,
-                add_dataloader_idx=add_dataloader_idx
+                add_dataloader_idx=add_dataloader_idx,
             )
 
     @staticmethod
     def __check_not_nested(value: dict, name: str) -> dict:
         # self-imposed restriction. for simplicity
         if any(isinstance(v, dict) for v in value.values()):
-            raise ValueError(f'`self.log({name}, {value})` was called, but nested dictionaries cannot be logged')
+            raise ValueError(f"`self.log({name}, {value})` was called, but nested dictionaries cannot be logged")
         return value
 
     @staticmethod
     def __check_allowed(v: Any, name: str, value: Any) -> None:
-        raise ValueError(f'`self.log({name}, {value})` was called, but `{type(v).__name__}` values cannot be logged')
+        raise ValueError(f"`self.log({name}, {value})` was called, but `{type(v).__name__}` values cannot be logged")
 
     def __to_tensor(self, value: numbers.Number) -> torch.Tensor:
         return torch.tensor(value, device=self.device)
@@ -467,7 +475,10 @@ class LightningModule(
         self.log_dict(grad_norm_dict, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
     def write_prediction(
-        self, name: str, value: Union[torch.Tensor, List[torch.Tensor]], filename: str = 'predictions.pt'
+        self,
+        name: str,
+        value: Union[torch.Tensor, List[torch.Tensor]],
+        filename: str = "predictions.pt",
     ):
         """
         Write predictions to disk using ``torch.save``
@@ -489,13 +500,13 @@ class LightningModule(
             Will be removed in v1.5.0.
         """
         rank_zero_deprecation(
-            'LightningModule method `write_prediction` was deprecated in v1.3'
-            ' and will be removed in v1.5.'
+            "LightningModule method `write_prediction` was deprecated in v1.3"
+            " and will be removed in v1.5."
         )
 
         self.trainer.evaluation_loop.predictions._add_prediction(name, value, filename)
 
-    def write_prediction_dict(self, predictions_dict: Dict[str, Any], filename: str = 'predictions.pt'):
+    def write_prediction_dict(self, predictions_dict: Dict[str, Any], filename: str = "predictions.pt"):
         """
         Write a dictonary of predictions to disk at once using ``torch.save``
 
@@ -516,8 +527,8 @@ class LightningModule(
             Will be removed in v1.5.0.
         """
         rank_zero_deprecation(
-            'LightningModule method `write_prediction_dict` was deprecated in v1.3 and'
-            ' will be removed in v1.5.'
+            "LightningModule method `write_prediction_dict` was deprecated in v1.3 and"
+            " will be removed in v1.5."
         )
 
         for k, v in predictions_dict.items():
@@ -526,13 +537,16 @@ class LightningModule(
     def __auto_choose_log_on_step(self, on_step: Optional[bool]) -> bool:
         if on_step is None:
             on_step = False
-            on_step |= self._current_fx_name in ('training_step', 'training_step_end')
+            on_step |= self._current_fx_name in ("training_step", "training_step_end")
         return on_step
 
     def __auto_choose_log_on_epoch(self, on_epoch: Optional[bool]) -> bool:
         if on_epoch is None:
             on_epoch = True
-            on_epoch &= self._current_fx_name not in ('training_step', 'training_step_end')
+            on_epoch &= self._current_fx_name not in (
+                "training_step",
+                "training_step_end",
+            )
         return on_epoch
 
     def all_gather(
@@ -1367,7 +1381,7 @@ class LightningModule(
             )
 
         # make sure we're using manual opt
-        self._verify_is_manual_optimization('manual_backward')
+        self._verify_is_manual_optimization("manual_backward")
 
         # backward
         self._running_manual_backward = True
@@ -1417,7 +1431,7 @@ class LightningModule(
         param_requires_grad_state = {}
         for opt in self.optimizers(use_pl_optimizer=False):
             for group in opt.param_groups:
-                for param in group['params']:
+                for param in group["params"]:
                     # If a param already appear in param_requires_grad_state, continue
                     if param in param_requires_grad_state:
                         continue
@@ -1427,7 +1441,7 @@ class LightningModule(
         # Then iterate over the current optimizer's parameters and set its `requires_grad`
         # properties accordingly
         for group in optimizer.param_groups:
-            for param in group['params']:
+            for param in group["params"]:
                 param.requires_grad = param_requires_grad_state[param]
         self._param_requires_grad_state = param_requires_grad_state
 
@@ -1443,7 +1457,7 @@ class LightningModule(
         for opt_idx, opt in enumerate(self.optimizers(use_pl_optimizer=False)):
             if optimizer_idx != opt_idx:
                 for group in opt.param_groups:
-                    for param in group['params']:
+                    for param in group["params"]:
                         if param in self._param_requires_grad_state:
                             param.requires_grad = self._param_requires_grad_state[param]
         # save memory
@@ -1681,14 +1695,16 @@ class LightningModule(
         if running_train_loss is not None:
             avg_training_loss = running_train_loss.cpu().item()
         elif self.automatic_optimization:
-            avg_training_loss = float('NaN')
+            avg_training_loss = float("NaN")
 
         tqdm_dict = {}
         if avg_training_loss is not None:
             tqdm_dict["loss"] = f"{avg_training_loss:.3g}"
 
         module_tbptt_enabled = self.truncated_bptt_steps > 0
-        trainer_tbptt_enabled = self.trainer.truncated_bptt_steps is not None and self.trainer.truncated_bptt_steps > 0
+        trainer_tbptt_enabled = (
+            self.trainer.truncated_bptt_steps is not None and self.trainer.truncated_bptt_steps > 0
+        )
         if module_tbptt_enabled or trainer_tbptt_enabled:
             tqdm_dict["split_idx"] = self.trainer.fit_loop.split_idx
 
@@ -1703,8 +1719,8 @@ class LightningModule(
     def _verify_is_manual_optimization(self, fn_name):
         if self.automatic_optimization:
             raise MisconfigurationException(
-                f'to use {fn_name}, please disable automatic optimization:'
-                ' set model property `automatic_optimization` as False'
+                f"to use {fn_name}, please disable automatic optimization:"
+                " set model property `automatic_optimization` as False"
             )
 
     @classmethod
@@ -1740,7 +1756,7 @@ class LightningModule(
         self,
         *args,
         ignore: Optional[Union[Sequence[str], str]] = None,
-        frame: Optional[types.FrameType] = None
+        frame: Optional[types.FrameType] = None,
     ) -> None:
         """Save model arguments to ``hparams`` attribute.
 
@@ -1876,7 +1892,7 @@ class LightningModule(
     def to_torchscript(
         self,
         file_path: Optional[Union[str, Path]] = None,
-        method: Optional[str] = 'script',
+        method: Optional[str] = "script",
         example_inputs: Optional[Any] = None,
         **kwargs,
     ) -> Union[ScriptModule, Dict[str, ScriptModule]]:
@@ -1926,15 +1942,15 @@ class LightningModule(
         """
         mode = self.training
 
-        if method == 'script':
+        if method == "script":
             torchscript_module = torch.jit.script(self.eval(), **kwargs)
-        elif method == 'trace':
+        elif method == "trace":
             # if no example inputs are provided, try to see if model has example_input_array set
             if example_inputs is None:
                 if self.example_input_array is None:
                     raise ValueError(
-                        'Choosing method=`trace` requires either `example_inputs`'
-                        ' or `model.example_input_array` to be defined.'
+                        "Choosing method=`trace` requires either `example_inputs`"
+                        " or `model.example_input_array` to be defined."
                     )
                 example_inputs = self.example_input_array
 

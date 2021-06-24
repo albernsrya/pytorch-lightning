@@ -71,7 +71,7 @@ class LitClassifier(pl.LightningModule):
         learning_rate: float = 0.0001,
     ):
         super().__init__()
-        self.save_hyperparameters(ignore=['backbone'])
+        self.save_hyperparameters(ignore=["backbone"])
         if backbone is None:
             backbone = Backbone()
         self.backbone = backbone
@@ -85,20 +85,20 @@ class LitClassifier(pl.LightningModule):
         x, y = batch
         y_hat = self.backbone(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('train_loss', loss, on_epoch=True)
+        self.log("train_loss", loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self.backbone(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('valid_loss', loss, on_step=True)
+        self.log("valid_loss", loss, on_step=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self.backbone(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('test_loss', loss)
+        self.log("test_loss", loss)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         x, y = batch
@@ -141,6 +141,6 @@ def cli_main():
     print(predictions[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_lightning_logo()
     cli_main()
