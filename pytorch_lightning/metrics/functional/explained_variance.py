@@ -23,7 +23,7 @@ from pytorch_lightning.metrics.utils import deprecated_metrics, void
 def explained_variance(
     preds: torch.Tensor,
     target: torch.Tensor,
-    multioutput: str = 'uniform_average',
+    multioutput: str = "uniform_average",
 ) -> Union[torch.Tensor, Sequence[torch.Tensor]]:
     """
     .. deprecated::

@@ -69,7 +69,7 @@ def test_metric_lightning(tmpdir):
 
 
 def test_metric_lightning_log(tmpdir):
-    """ Test logging a metric object and that the metric state gets reset after each epoch."""
+    """Test logging a metric object and that the metric state gets reset after each epoch."""
 
     class TestModel(BoringModel):
 
@@ -88,10 +88,10 @@ def test_metric_lightning_log(tmpdir):
             self.metric_step(x.sum())
             self.sum += x.sum()
             self.log("sum_step", self.metric_step, on_epoch=True, on_step=False)
-            return {'loss': self.step(x), 'data': x}
+            return {"loss": self.step(x), "data": x}
 
         def training_epoch_end(self, outs):
-            total = torch.stack([o['data'] for o in outs]).sum()
+            total = torch.stack([o["data"] for o in outs]).sum()
             self.metric_epoch(total)
             self.log("sum_epoch", self.metric_epoch)
             self.total_sum = total
@@ -169,12 +169,12 @@ def test_metric_collection_lightning_log(tmpdir):
             metric_vals = self.metric(x.sum())
             self.sum += x.sum()
             self.diff -= x.sum()
-            self.log_dict({f'{k}_step': v for k, v in metric_vals.items()})
+            self.log_dict({f"{k}_step": v for k, v in metric_vals.items()})
             return self.step(x)
 
         def training_epoch_end(self, outputs):
             metric_vals = self.metric.compute()
-            self.log_dict({f'{k}_epoch': v for k, v in metric_vals.items()})
+            self.log_dict({f"{k}_epoch": v for k, v in metric_vals.items()})
 
     model = TestModel()
     model.val_dataloader = None

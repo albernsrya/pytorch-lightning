@@ -21,7 +21,10 @@ from tests.helpers.utils import get_default_logger, load_model_from_checkpoint, 
 
 
 def run_model_test_without_loggers(
-    trainer_options: dict, model: LightningModule, data: LightningDataModule = None, min_acc: float = 0.50
+    trainer_options: dict,
+    model: LightningModule,
+    data: LightningDataModule = None,
+    min_acc: float = 0.50,
 ):
     reset_seed()
 
@@ -51,10 +54,10 @@ def run_model_test(
     on_gpu: bool = True,
     version=None,
     with_hpc: bool = True,
-    min_acc: float = 0.25
+    min_acc: float = 0.25,
 ):
     reset_seed()
-    save_dir = trainer_options['default_root_dir']
+    save_dir = trainer_options["default_root_dir"]
 
     # logger file to get meta
     logger = get_default_logger(save_dir, version=version)
@@ -82,10 +85,17 @@ def run_model_test(
             run_prediction_eval_model_template(model, dataloader, min_acc=min_acc)
 
     if with_hpc:
-        if trainer._distrib_type in (DistributedType.DDP, DistributedType.DDP_SPAWN, DistributedType.DDP2):
+        if trainer._distrib_type in (
+            DistributedType.DDP,
+            DistributedType.DDP_SPAWN,
+            DistributedType.DDP2,
+        ):
             # on hpc this would work fine... but need to hack it for the purpose of the test
-            trainer.optimizers, trainer.lr_schedulers, trainer.optimizer_frequencies = \
-                trainer.init_optimizers(pretrained_model)
+            (
+                trainer.optimizers,
+                trainer.lr_schedulers,
+                trainer.optimizer_frequencies,
+            ) = trainer.init_optimizers(pretrained_model)
 
         # test HPC saving
         trainer.checkpoint_connector.hpc_save(save_dir, logger)
@@ -108,5 +118,5 @@ def run_prediction_eval_model_template(trained_model, dataloader, min_acc=0.50):
     y_hat = trained_model(x)
     acc = accuracy(y_hat.cpu(), y.cpu(), top_k=2).item()
 
-    assert acc >= min_acc, f"This model is expected to get > {min_acc} in test set (it got {acc})"
+    assert (acc >= min_acc), f"This model is expected to get > {min_acc} in test set (it got {acc})"
     trained_model.to(orig_device)

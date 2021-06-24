@@ -284,7 +284,7 @@ class TrainerCallbackHookMixin(ABC):
         # Todo: the `callback_states` are dropped with TPUSpawn as they
         # can't be saved using `xm.save`
         # https://github.com/pytorch/xla/issues/2773
-        callback_states = checkpoint.get('callbacks')
+        callback_states = checkpoint.get("callbacks")
 
         if callback_states is None:
             return
@@ -296,7 +296,8 @@ class TrainerCallbackHookMixin(ABC):
             rank_zero_warn(
                 "Be aware that when using ``resume_from_checkpoint``, "
                 "callbacks used to create the checkpoint need to be provided. "
-                f"Please, add the following callbacks: {list(difference)}. ", UserWarning
+                f"Please, add the following callbacks: {list(difference)}. ",
+                UserWarning,
             )
 
         for callback in self.callbacks:

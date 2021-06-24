@@ -77,7 +77,7 @@ class LitAutoEncoder(pl.LightningModule):
         z = self.encoder(x)
         x_hat = self.decoder(z)
         loss = F.mse_loss(x_hat, x)
-        self.log('valid_loss', loss, on_step=True)
+        self.log("valid_loss", loss, on_step=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -85,7 +85,7 @@ class LitAutoEncoder(pl.LightningModule):
         z = self.encoder(x)
         x_hat = self.decoder(z)
         loss = F.mse_loss(x_hat, x)
-        self.log('test_loss', loss, on_step=True)
+        self.log("test_loss", loss, on_step=True)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         x, y = batch
@@ -130,6 +130,6 @@ def cli_main():
     print(predictions[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_lightning_logo()
     cli_main()

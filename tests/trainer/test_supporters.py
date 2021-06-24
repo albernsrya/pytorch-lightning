@@ -37,7 +37,7 @@ from pytorch_lightning.utilities.exceptions import MisconfigurationException
 
 
 def test_tensor_running_accum_reset():
-    """ Test that reset would set all attributes to the initialization state """
+    """Test that reset would set all attributes to the initialization state"""
 
     window_length = 10
 
@@ -80,7 +80,7 @@ def test_none_length_cycle_iterator():
 
 
 def test_prefetch_iterator():
-    """ Test the prefetch_iterator with PyTorch IterableDataset. """
+    """Test the prefetch_iterator with PyTorch IterableDataset."""
 
     class IterDataset(IterableDataset):
 
@@ -153,13 +153,19 @@ def test_combined_loader_init_mode_error():
 
 def test_combined_loader_loader_type_error():
     """Test the ValueError when wrapping the loaders"""
-    with pytest.raises(TypeError, match="Expected data to be int, Sequence or Mapping, but got NoneType"):
+    with pytest.raises(
+        TypeError,
+        match="Expected data to be int, Sequence or Mapping, but got NoneType",
+    ):
         CombinedLoader(None, "max_size_cycle")
 
 
 def test_combined_loader_calc_length_mode_error():
     """Test the ValueError when calculating the number of batches"""
-    with pytest.raises(TypeError, match="Expected data to be int, Sequence or Mapping, but got NoneType"):
+    with pytest.raises(
+        TypeError,
+        match="Expected data to be int, Sequence or Mapping, but got NoneType",
+    ):
         CombinedLoader._calc_num_batches(None)
 
 
@@ -246,16 +252,26 @@ def test_combined_loader_sequence_max_size_cycle():
                        for i in range(1, 20)}], min, 0),
         ([*range(10), {str(i): i
                        for i in range(1, 20)}], max, 19),
-        ({
-            **{str(i): i
-               for i in range(10)}, "nested": {str(i): i
-                                               for i in range(1, 20)}
-        }, min, 0),
-        ({
-            **{str(i): i
-               for i in range(10)}, "nested": {str(i): i
-                                               for i in range(1, 20)}
-        }, max, 19),
+        (
+            {
+                **{str(i): i
+                   for i in range(10)},
+                "nested": {str(i): i
+                           for i in range(1, 20)},
+            },
+            min,
+            0,
+        ),
+        (
+            {
+                **{str(i): i
+                   for i in range(10)},
+                "nested": {str(i): i
+                           for i in range(1, 20)},
+            },
+            max,
+            19,
+        ),
         ({
             **{str(i): i
                for i in range(10)}, "nested": list(range(20))
@@ -273,8 +289,8 @@ def test_nested_calc_num_data(input_data, compute_func, expected_length):
 
 
 @mock.patch.dict(os.environ, {"CUDA_VISIBLE_DEVICES": "0,1", "PL_TRAINER_GPUS": "2"})
-@mock.patch('torch.cuda.device_count', return_value=2)
-@mock.patch('torch.cuda.is_available', return_value=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
+@mock.patch("torch.cuda.is_available", return_value=True)
 def test_combined_data_loader_validation_test(cuda_available_mock, device_count_mock, tmpdir):
     """
     This test makes sure distributed sampler has been properly injected in dataloaders
@@ -296,10 +312,12 @@ def test_combined_data_loader_validation_test(cuda_available_mock, device_count_
         "a": DataLoader(CustomDataset(range(10))),
         "b": {
             "c": DataLoader(CustomDataset(range(10))),
-            "d": DataLoader(CustomDataset(range(10)))
+            "d": DataLoader(CustomDataset(range(10))),
         },
-        "e": [DataLoader(CustomDataset(range(10))),
-              DataLoader(CustomDataset(range(10)))]
+        "e": [
+            DataLoader(CustomDataset(range(10))),
+            DataLoader(CustomDataset(range(10))),
+        ],
     })
 
     trainer = Trainer(replace_sampler_ddp=True, accelerator="ddp", gpus=2)

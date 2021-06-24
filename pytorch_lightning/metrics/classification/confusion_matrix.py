@@ -36,4 +36,11 @@ class ConfusionMatrix(_ConfusionMatrix):
         .. deprecated::
             Use :class:`~torchmetrics.ConfusionMatrix`. Will be removed in v1.5.0.
         """
-        void(num_classes, normalize, threshold, compute_on_step, dist_sync_on_step, process_group)
+        void(
+            num_classes,
+            normalize,
+            threshold,
+            compute_on_step,
+            dist_sync_on_step,
+            process_group,
+        )

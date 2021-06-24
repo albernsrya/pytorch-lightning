@@ -23,11 +23,11 @@ from tests.helpers.runif import RunIf
 class TestModel(BoringModel):
 
     def on_pretrain_routine_end(self) -> None:
-        with mock.patch('pytorch_lightning.loggers.base.LightningLoggerBase.agg_and_log_metrics') as m:
-            self.trainer.logger_connector.log_metrics({'a': 2})
+        with mock.patch("pytorch_lightning.loggers.base.LightningLoggerBase.agg_and_log_metrics") as m:
+            self.trainer.logger_connector.log_metrics({"a": 2})
             logged_times = m.call_count
             expected = int(self.trainer.is_global_zero)
-            msg = f'actual logger called from non-global zero, logged_times: {logged_times}, expected: {expected}'
+            msg = f"actual logger called from non-global zero, logged_times: {logged_times}, expected: {expected}"
             assert logged_times == expected, msg
 
 
@@ -39,7 +39,7 @@ def test_global_zero_only_logging_ddp_cpu(tmpdir):
     model = TestModel()
     model.training_epoch_end = None
     trainer = Trainer(
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
         num_processes=2,
         default_root_dir=tmpdir,
         limit_train_batches=1,
@@ -58,7 +58,7 @@ def test_global_zero_only_logging_ddp_spawn(tmpdir):
     model = TestModel()
     model.training_epoch_end = None
     trainer = Trainer(
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         gpus=2,
         default_root_dir=tmpdir,
         limit_train_batches=1,
@@ -100,6 +100,6 @@ def test_first_logger_call_in_subprocess(tmpdir):
         limit_val_batches=1,
         max_epochs=1,
         logger=logger,
-        callbacks=[LoggerCallsObserver()]
+        callbacks=[LoggerCallsObserver()],
     )
     trainer.fit(model)

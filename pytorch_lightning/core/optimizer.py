@@ -37,17 +37,23 @@ class LightningOptimizer:
 
     def __init__(self, optimizer: Optimizer):
 
-        self.__dict__ = {k: v for k, v in optimizer.__dict__.items() if k not in ('step', "__del__")}
+        self.__dict__ = {k: v for k, v in optimizer.__dict__.items() if k not in ("step", "__del__")}
 
         # For Horovod
         if hasattr(optimizer, "skip_synchronize"):
             self.__class__ = type(
-                "Lightning" + optimizer.__class__.__name__, (self.__class__, optimizer.__class__.__bases__[0]), {}
+                "Lightning" + optimizer.__class__.__name__,
+                (self.__class__, optimizer.__class__.__bases__[0]),
+                {},
             )
             self.skip_synchronize = optimizer.skip_synchronize
             self.synchronize = optimizer.synchronize
         else:
-            self.__class__ = type("Lightning" + optimizer.__class__.__name__, (self.__class__, optimizer.__class__), {})
+            self.__class__ = type(
+                "Lightning" + optimizer.__class__.__name__,
+                (self.__class__, optimizer.__class__),
+                {},
+            )
 
         self._optimizer = optimizer
         self._trainer = None

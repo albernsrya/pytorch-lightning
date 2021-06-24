@@ -192,7 +192,7 @@ class EvaluationEpochLoop(Loop):
             batch_idx: The index of the current batch
             dataloader_idx: Index of the dataloader producing the current batch
         """
-        hook_name = "on_test_batch_end" if self.trainer.testing else "on_validation_batch_end"
+        hook_name = ("on_test_batch_end" if self.trainer.testing else "on_validation_batch_end")
         self.trainer.call_hook(hook_name, output, batch, batch_idx, dataloader_idx)
 
         self.trainer.logger_connector.on_batch_end()
@@ -250,7 +250,7 @@ class EvaluationEpochLoop(Loop):
                     output = output.cpu()
             elif isinstance(output, dict):
                 output = recursive_detach(output, to_cpu=self.trainer.move_metrics_to_cpu)
-            elif isinstance(output, Tensor) and output.is_cuda and self.trainer.move_metrics_to_cpu:
+            elif (isinstance(output, Tensor) and output.is_cuda and self.trainer.move_metrics_to_cpu):
                 output = output.cpu()
             outputs.append(output)
         return outputs

@@ -39,11 +39,13 @@ class ApexMixedPrecisionPlugin(MixedPrecisionPlugin):
     def master_params(self, optimizer: Optimizer) -> _PARAMETERS:
         return amp.master_params(optimizer)
 
-    def dispatch(self, trainer: 'pl.Trainer') -> None:
+    def dispatch(self, trainer: "pl.Trainer") -> None:
         if not self._connected:
             accelerator = trainer.accelerator
             _, accelerator.optimizers = amp.initialize(
-                trainer.lightning_module, accelerator.optimizers, opt_level=self.amp_level
+                trainer.lightning_module,
+                accelerator.optimizers,
+                opt_level=self.amp_level,
             )
             self._connected = True
         return super().dispatch(trainer)
@@ -80,7 +82,7 @@ class ApexMixedPrecisionPlugin(MixedPrecisionPlugin):
             model.backward(closure_loss, optimizer, opt_idx, **kwargs)
 
             # TODO: avoid dev_debugger and track these calls with mock
-            model.trainer.dev_debugger.track_event('AMP', str(AMPType.APEX))
+            model.trainer.dev_debugger.track_event("AMP", str(AMPType.APEX))
 
         else:
             closure_loss.backward(*args, **kwargs)
@@ -99,7 +101,7 @@ class ApexMixedPrecisionPlugin(MixedPrecisionPlugin):
         """Reinitializes schedulers with correct properties"""
         # Reinitialize optimizer.step properties added by schedulers
         for scheduler in schedulers:
-            scheduler = scheduler['scheduler']
+            scheduler = scheduler["scheduler"]
             state = None
 
             for optimizer in optimizers:
@@ -107,7 +109,10 @@ class ApexMixedPrecisionPlugin(MixedPrecisionPlugin):
                 if scheduler.optimizer == optimizer:
                     # Find the mro belonging to the base lr scheduler class
                     for i, mro in enumerate(scheduler.__class__.__mro__):
-                        if mro in (torch.optim.lr_scheduler._LRScheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                        if mro in (
+                            torch.optim.lr_scheduler._LRScheduler,
+                            torch.optim.lr_scheduler.ReduceLROnPlateau,
+                        ):
                             state = scheduler.state_dict()
                             scheduler.__class__.__mro__[i].__init__(scheduler, optimizer)
                             scheduler.load_state_dict(state)

@@ -88,8 +88,8 @@ class FxValidator:
         """Check if the given function name is allowed to log"""
         if fx_name not in cls.functions:
             raise RuntimeError(
-                f'You are trying to `self.log()` inside `{fx_name}` but it is not implemented.'
-                ' Please, open an issue in `https://github.com/PyTorchLightning/pytorch-lightning/issues`'
+                f"You are trying to `self.log()` inside `{fx_name}` but it is not implemented."
+                " Please, open an issue in `https://github.com/PyTorchLightning/pytorch-lightning/issues`"
             )
         allowed = cls.functions[fx_name]
         if allowed is None:

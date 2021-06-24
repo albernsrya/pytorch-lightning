@@ -28,8 +28,8 @@ def is_overridden(
 ) -> bool:
     if model is not None and instance is None:
         rank_zero_deprecation(
-            '`is_overriden(model=...)` has been deprecated and will be removed in v1.6.'
-            'Please use `is_overriden(instance=...)`'
+            "`is_overriden(model=...)` has been deprecated and will be removed in v1.6."
+            "Please use `is_overriden(instance=...)`"
         )
         instance = model
 
@@ -63,7 +63,7 @@ def is_overridden(
     # cannot pickle `__code__` so cannot verify if `PatchDataloader`
     # exists which shows dataloader methods have been overwritten.
     # so, we hack it by using the string representation
-    instance_code = getattr(instance_attr, 'patch_loader_code', None) or instance_attr.__code__
+    instance_code = (getattr(instance_attr, "patch_loader_code", None) or instance_attr.__code__)
     parent_code = parent_attr.__code__
 
     return instance_code != parent_code

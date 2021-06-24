@@ -25,7 +25,7 @@ def confusion_matrix(
     target: torch.Tensor,
     num_classes: int,
     normalize: Optional[str] = None,
-    threshold: float = 0.5
+    threshold: float = 0.5,
 ) -> torch.Tensor:
     """
     .. deprecated::

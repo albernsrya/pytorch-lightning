@@ -51,7 +51,7 @@ def test_overfit_multiple_val_loaders(tmpdir):
     trainer.fit(model)
 
 
-@pytest.mark.parametrize('overfit', [1, 2, 0.1, 0.25, 1.0])
+@pytest.mark.parametrize("overfit", [1, 2, 0.1, 0.25, 1.0])
 def test_overfit_basic(tmpdir, overfit):
     """
     Tests that only training_step can be used

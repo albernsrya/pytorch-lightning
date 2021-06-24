@@ -88,15 +88,15 @@ class TensorRunningAccum(object):
 
     def mean(self):
         """Get mean value from stored elements."""
-        return self._agg_memory('mean')
+        return self._agg_memory("mean")
 
     def max(self):
         """Get maximal value from stored elements."""
-        return self._agg_memory('max')
+        return self._agg_memory("max")
 
     def min(self):
         """Get minimal value from stored elements."""
-        return self._agg_memory('min')
+        return self._agg_memory("min")
 
     def _agg_memory(self, how: str):
         if self.last_idx is not None:
@@ -134,8 +134,7 @@ class PredictionCollection(object):
                 self._add_prediction(feature_name, values, filename)
 
     def to_disk(self) -> None:
-        """Write predictions to file(s).
-        """
+        """Write predictions to file(s)."""
         for filepath, predictions in self.predictions.items():
             fs = get_filesystem(filepath)
             # normalize local filepaths only
@@ -181,7 +180,7 @@ class CycleIterator(object):
 
         """
         if length is None:
-            length = float('inf')
+            length = float("inf")
 
         self.length = length
         self.loader = loader
@@ -234,9 +233,10 @@ class CombinedDataset(object):
     """
     Combine multiple datasets and compute their statistics
     """
-    COMPUTE_FUNCS = {'min_size': min, 'max_size_cycle': max}
 
-    def __init__(self, datasets: Union[Sequence, Mapping], mode: str = 'min_size'):
+    COMPUTE_FUNCS = {"min_size": min, "max_size_cycle": max}
+
+    def __init__(self, datasets: Union[Sequence, Mapping], mode: str = "min_size"):
         """
 
         Args:
@@ -250,17 +250,17 @@ class CombinedDataset(object):
         if mode not in self.COMPUTE_FUNCS.keys():
             raise MisconfigurationException(
                 f'You have selected unsupported mode "{mode}",'
-                f' please select one the: {list(self.COMPUTE_FUNCS.keys())}.'
+                f" please select one the: {list(self.COMPUTE_FUNCS.keys())}."
             )
         self.mode = mode
 
     @property
     def max_len(self) -> Union[int, float]:
-        return self._calc_num_data(self.datasets, 'max_size_cycle')
+        return self._calc_num_data(self.datasets, "max_size_cycle")
 
     @property
     def min_len(self) -> Union[int, float]:
-        return self._calc_num_data(self.datasets, 'min_size')
+        return self._calc_num_data(self.datasets, "min_size")
 
     def _calc_num_data(self, datasets: Union[Sequence, Mapping], mode: str) -> Union[int, float]:
         """
@@ -313,7 +313,7 @@ class CombinedDataset(object):
         try:
             return len(dataset)
         except (TypeError, NotImplementedError):
-            return float('inf')
+            return float("inf")
 
     def __len__(self) -> int:
         """Return the minimum length of the datasets."""
@@ -345,9 +345,10 @@ class CombinedLoader(object):
         {'a': tensor([4, 5]), 'b': tensor([5, 6, 7, 8, 9])}
 
     """
-    SUPPORTED_MODES = ('min_size', 'max_size_cycle')
 
-    def __init__(self, loaders: Any, mode: str = 'min_size'):
+    SUPPORTED_MODES = ("min_size", "max_size_cycle")
+
+    def __init__(self, loaders: Any, mode: str = "min_size"):
         """
 
         Args:
@@ -362,20 +363,25 @@ class CombinedLoader(object):
         self.loaders = loaders
 
         datasets = apply_to_collection(
-            self.loaders, Iterable, getattr, 'dataset', None, wrong_dtype=(Sequence, Mapping)
+            self.loaders,
+            Iterable,
+            getattr,
+            "dataset",
+            None,
+            wrong_dtype=(Sequence, Mapping),
         )
         # could be multiple datasets, but use self.dataset to follow the name convention in DataLoader
         self.dataset = CombinedDataset(datasets, mode)
 
         self.mode = mode
 
-        if self.mode == 'max_size_cycle':
+        if self.mode == "max_size_cycle":
             self._wrap_loaders_max_size_cycle()
 
     @property
     def sampler(self) -> Union[Iterable, Sequence, Mapping]:
         """Return a collections of samplers extracting from loaders."""
-        return apply_to_collection(self.loaders, (DataLoader, IterableDataset), getattr, 'sampler', None)
+        return apply_to_collection(self.loaders, (DataLoader, IterableDataset), getattr, "sampler", None)
 
     def _wrap_loaders_max_size_cycle(self) -> Any:
         """
@@ -392,7 +398,11 @@ class CombinedLoader(object):
         # multiple loaders
         if isinstance(self.loaders, (Sequence, Mapping)):
             self.loaders = apply_to_collection(
-                self.loaders, Iterable, CycleIterator, length=length, wrong_dtype=(Sequence, Mapping)
+                self.loaders,
+                Iterable,
+                CycleIterator,
+                length=length,
+                wrong_dtype=(Sequence, Mapping),
             )
 
     def __iter__(self) -> Any:
@@ -504,7 +514,7 @@ def _nested_calc_num_data(data: Union[Mapping, Sequence], compute_func: Callable
         data = list(data.values())
 
     if not isinstance(data, Sequence):
-        raise TypeError(f'Expected data to be int, Sequence or Mapping, but got {type(data).__name__}')
+        raise TypeError(f"Expected data to be int, Sequence or Mapping, but got {type(data).__name__}")
 
     new_data = []
 

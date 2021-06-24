@@ -58,7 +58,7 @@ CONVERSION_DTYPES = [
 
 def _is_namedtuple(obj: object) -> bool:
     # https://github.com/pytorch/pytorch/blob/v1.8.1/torch/nn/parallel/scatter_gather.py#L4-L8
-    return isinstance(obj, tuple) and hasattr(obj, "_asdict") and hasattr(obj, "_fields")
+    return (isinstance(obj, tuple) and hasattr(obj, "_asdict") and hasattr(obj, "_fields"))
 
 
 def _is_dataclass_instance(obj):
@@ -159,7 +159,7 @@ def apply_to_collections(
 
     elem_type = type(data1)
 
-    if isinstance(data1, dtype) and data2 is not None and (wrong_dtype is None or not isinstance(data1, wrong_dtype)):
+    if (isinstance(data1, dtype) and data2 is not None and (wrong_dtype is None or not isinstance(data1, wrong_dtype))):
         return function(data1, data2, *args, **kwargs)
 
     if isinstance(data1, Mapping) and data2 is not None:
@@ -173,7 +173,7 @@ def apply_to_collections(
     is_namedtuple = _is_namedtuple(data1)
     is_sequence = isinstance(data1, Sequence) and not isinstance(data1, str)
     if (is_namedtuple or is_sequence) and data2 is not None:
-        assert len(data1) == len(data2), 'Sequence collections have different sizes'
+        assert len(data1) == len(data2), "Sequence collections have different sizes"
         out = [
             apply_to_collections(v1, v2, dtype, function, *args, wrong_dtype=wrong_dtype, **kwargs)
             for v1, v2 in zip(data1, data2)
@@ -243,7 +243,7 @@ def move_data_to_device(batch: Any, device: torch.device):
         kwargs = dict(non_blocking=True) if isinstance(data, torch.Tensor) else {}
         return data.to(device, **kwargs)
 
-    dtype = (TransferableDataType, Batch) if _TORCHTEXT_AVAILABLE else TransferableDataType
+    dtype = ((TransferableDataType, Batch) if _TORCHTEXT_AVAILABLE else TransferableDataType)
     return apply_to_collection(batch, dtype=dtype, function=batch_to)
 
 

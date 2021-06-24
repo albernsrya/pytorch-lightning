@@ -74,7 +74,7 @@ class SimpleProfiler(BaseProfiler):
 
     def _make_report(self) -> Tuple[list, float]:
         total_duration = time.monotonic() - self.start_time
-        report = [[a, d, 100. * np.sum(d) / total_duration] for a, d in self.recorded_durations.items()]
+        report = [[a, d, 100.0 * np.sum(d) / total_duration] for a, d in self.recorded_durations.items()]
         report.sort(key=lambda x: x[2], reverse=True)
         return report, total_duration
 
@@ -95,7 +95,13 @@ class SimpleProfiler(BaseProfiler):
                     row += f"{num_calls:<15}\t|  {total:<15}\t|  {per:<15}\t|"
                     return row
 
-                output_string += log_row("Action", "Mean duration (s)", "Num calls", "Total time (s)", "Percentage %")
+                output_string += log_row(
+                    "Action",
+                    "Mean duration (s)",
+                    "Num calls",
+                    "Total time (s)",
+                    "Percentage %",
+                )
                 output_string_len = len(output_string)
                 output_string += f"{sep}{'-' * output_string_len}"
                 report, total_duration = self._make_report()

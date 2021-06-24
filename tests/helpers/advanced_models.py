@@ -121,7 +121,7 @@ class BasicGAN(LightningModule):
 
             # adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss(self.discriminator(self.generated_imgs), valid)
-            self.log('g_loss', g_loss, prog_bar=True, logger=True)
+            self.log("g_loss", g_loss, prog_bar=True, logger=True)
             return g_loss
 
         # train discriminator
@@ -142,7 +142,7 @@ class BasicGAN(LightningModule):
 
             # discriminator loss is the average of these
             d_loss = (real_loss + fake_loss) / 2
-            self.log('d_loss', d_loss, prog_bar=True, logger=True)
+            self.log("d_loss", d_loss, prog_bar=True, logger=True)
             return d_loss
 
     def configure_optimizers(self):
@@ -174,7 +174,7 @@ class ParityModuleRNN(LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.mse_loss(y_hat, y)
-        return {'loss': loss}
+        return {"loss": loss}
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.02)
@@ -206,14 +206,18 @@ class ParityModuleMNIST(LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        return {'loss': loss}
+        return {"loss": loss}
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.02)
 
     def train_dataloader(self):
-        return DataLoader(MNIST(
-            root=PATH_DATASETS,
-            train=True,
-            download=True,
-        ), batch_size=128, num_workers=1)
+        return DataLoader(
+            MNIST(
+                root=PATH_DATASETS,
+                train=True,
+                download=True,
+            ),
+            batch_size=128,
+            num_workers=1,
+        )

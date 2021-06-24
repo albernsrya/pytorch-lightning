@@ -58,7 +58,7 @@ def test_accelerator_choice_cpu(tmpdir):
 def test_accelerator_choice_ddp_cpu(tmpdir):
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
     )
     assert isinstance(trainer.accelerator, CPUAccelerator)
     assert isinstance(trainer.training_type_plugin, DDPSpawnPlugin)
@@ -66,12 +66,12 @@ def test_accelerator_choice_ddp_cpu(tmpdir):
 
 
 @mock.patch.dict(os.environ, {"CUDA_VISIBLE_DEVICES": "0,1"})
-@mock.patch('torch.cuda.device_count', return_value=2)
-@mock.patch('torch.cuda.is_available', return_value=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
+@mock.patch("torch.cuda.is_available", return_value=True)
 def test_accelerator_choice_ddp(cuda_available_mock, device_count_mock):
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp',
+        accelerator="ddp",
         gpus=1,
     )
     assert isinstance(trainer.accelerator, GPUAccelerator)
@@ -80,12 +80,12 @@ def test_accelerator_choice_ddp(cuda_available_mock, device_count_mock):
 
 
 @mock.patch.dict(os.environ, {"CUDA_VISIBLE_DEVICES": "0,1"})
-@mock.patch('torch.cuda.device_count', return_value=2)
-@mock.patch('torch.cuda.is_available', return_value=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
+@mock.patch("torch.cuda.is_available", return_value=True)
 def test_accelerator_choice_ddp_spawn(cuda_available_mock, device_count_mock):
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         gpus=1,
     )
     assert isinstance(trainer.accelerator, GPUAccelerator)
@@ -95,16 +95,17 @@ def test_accelerator_choice_ddp_spawn(cuda_available_mock, device_count_mock):
 
 @RunIf(min_gpus=2)
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "CUDA_VISIBLE_DEVICES": "0,1",
         "SLURM_NTASKS": "2",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "SLURM_PROCID": "1",
         "SLURM_LOCALID": "1",
-    }
+    },
 )
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_slurm(setup_distributed_mock):
 
     class CB(Callback):
@@ -121,7 +122,7 @@ def test_accelerator_choice_ddp_slurm(setup_distributed_mock):
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp',
+        accelerator="ddp",
         gpus=2,
         callbacks=[CB()],
     )
@@ -132,17 +133,18 @@ def test_accelerator_choice_ddp_slurm(setup_distributed_mock):
 
 @RunIf(min_gpus=2)
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "CUDA_VISIBLE_DEVICES": "0,1",
         "SLURM_NTASKS": "2",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "SLURM_PROCID": "1",
-        "SLURM_LOCALID": "1"
-    }
+        "SLURM_LOCALID": "1",
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=2)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp2_slurm(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -159,7 +161,7 @@ def test_accelerator_choice_ddp2_slurm(device_count_mock, setup_distributed_mock
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp2',
+        accelerator="ddp2",
         gpus=2,
         callbacks=[CB()],
     )
@@ -170,17 +172,18 @@ def test_accelerator_choice_ddp2_slurm(device_count_mock, setup_distributed_mock
 
 @RunIf(min_gpus=1)
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "CUDA_VISIBLE_DEVICES": "0,1",
         "WORLD_SIZE": "2",
         "LOCAL_WORLD_SIZE": "2",
         "RANK": "1",
         "LOCAL_RANK": "1",
         "GROUP_RANK": "0",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=2)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_te(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -188,7 +191,10 @@ def test_accelerator_choice_ddp_te(device_count_mock, setup_distributed_mock):
         def on_fit_start(self, trainer, pl_module):
             assert isinstance(trainer.accelerator, GPUAccelerator)
             assert isinstance(trainer.training_type_plugin, DDPPlugin)
-            assert isinstance(trainer.training_type_plugin.cluster_environment, TorchElasticEnvironment)
+            assert isinstance(
+                trainer.training_type_plugin.cluster_environment,
+                TorchElasticEnvironment,
+            )
             assert trainer.training_type_plugin.cluster_environment.local_rank() == 1
             assert trainer.training_type_plugin.task_idx == 1
             raise SystemExit()
@@ -196,7 +202,7 @@ def test_accelerator_choice_ddp_te(device_count_mock, setup_distributed_mock):
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp',
+        accelerator="ddp",
         gpus=2,
         callbacks=[CB()],
     )
@@ -207,17 +213,18 @@ def test_accelerator_choice_ddp_te(device_count_mock, setup_distributed_mock):
 
 @RunIf(min_gpus=1)
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "CUDA_VISIBLE_DEVICES": "0,1",
         "WORLD_SIZE": "2",
         "LOCAL_WORLD_SIZE": "2",
         "RANK": "1",
         "LOCAL_RANK": "1",
         "GROUP_RANK": "0",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=2)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp2_te(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -225,7 +232,10 @@ def test_accelerator_choice_ddp2_te(device_count_mock, setup_distributed_mock):
         def on_fit_start(self, trainer, pl_module):
             assert isinstance(trainer.accelerator, GPUAccelerator)
             assert isinstance(trainer.training_type_plugin, DDP2Plugin)
-            assert isinstance(trainer.training_type_plugin.cluster_environment, TorchElasticEnvironment)
+            assert isinstance(
+                trainer.training_type_plugin.cluster_environment,
+                TorchElasticEnvironment,
+            )
             assert trainer.training_type_plugin.cluster_environment.local_rank() == 1
             assert trainer.training_type_plugin.task_idx == 1
             raise SystemExit()
@@ -233,7 +243,7 @@ def test_accelerator_choice_ddp2_te(device_count_mock, setup_distributed_mock):
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp2',
+        accelerator="ddp2",
         gpus=2,
         callbacks=[CB()],
     )
@@ -243,16 +253,17 @@ def test_accelerator_choice_ddp2_te(device_count_mock, setup_distributed_mock):
 
 
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "WORLD_SIZE": "2",
         "LOCAL_WORLD_SIZE": "2",
         "RANK": "1",
         "LOCAL_RANK": "1",
         "GROUP_RANK": "0",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=0)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=0)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_cpu_te(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -260,7 +271,10 @@ def test_accelerator_choice_ddp_cpu_te(device_count_mock, setup_distributed_mock
         def on_fit_start(self, trainer, pl_module):
             assert isinstance(trainer.accelerator, CPUAccelerator)
             assert isinstance(trainer.training_type_plugin, DDPPlugin)
-            assert isinstance(trainer.training_type_plugin.cluster_environment, TorchElasticEnvironment)
+            assert isinstance(
+                trainer.training_type_plugin.cluster_environment,
+                TorchElasticEnvironment,
+            )
             assert trainer.training_type_plugin.cluster_environment.local_rank() == 1
             assert trainer.training_type_plugin.task_idx == 1
             raise SystemExit()
@@ -268,7 +282,7 @@ def test_accelerator_choice_ddp_cpu_te(device_count_mock, setup_distributed_mock
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
         num_processes=2,
         callbacks=[CB()],
     )
@@ -279,17 +293,18 @@ def test_accelerator_choice_ddp_cpu_te(device_count_mock, setup_distributed_mock
 
 @RunIf(min_gpus=1)
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "CUDA_VISIBLE_DEVICES": "0",
         "KUBERNETES_PORT": "tcp://127.0.0.1:443",
         "MASTER_ADDR": "1.2.3.4",
         "MASTER_PORT": "500",
         "WORLD_SIZE": "20",
         "RANK": "1",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=1)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=1)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_kubeflow(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -305,7 +320,7 @@ def test_accelerator_choice_ddp_kubeflow(device_count_mock, setup_distributed_mo
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp',
+        accelerator="ddp",
         gpus=1,
         callbacks=[CB()],
     )
@@ -315,16 +330,17 @@ def test_accelerator_choice_ddp_kubeflow(device_count_mock, setup_distributed_mo
 
 
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "KUBERNETES_PORT": "tcp://127.0.0.1:443",
         "MASTER_ADDR": "1.2.3.4",
         "MASTER_PORT": "500",
         "WORLD_SIZE": "20",
         "RANK": "1",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=0)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=0)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_cpu_kubeflow(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -340,7 +356,7 @@ def test_accelerator_choice_ddp_cpu_kubeflow(device_count_mock, setup_distribute
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
         num_processes=1,
         callbacks=[CB()],
     )
@@ -350,17 +366,18 @@ def test_accelerator_choice_ddp_cpu_kubeflow(device_count_mock, setup_distribute
 
 
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "SLURM_NTASKS": "2",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "LOCAL_RANK": "0",
         "SLURM_PROCID": "0",
         "SLURM_LOCALID": "0",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=0)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=0)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_cpu_slurm(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -376,7 +393,7 @@ def test_accelerator_choice_ddp_cpu_slurm(device_count_mock, setup_distributed_m
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
         num_processes=2,
         callbacks=[CB()],
     )
@@ -386,17 +403,18 @@ def test_accelerator_choice_ddp_cpu_slurm(device_count_mock, setup_distributed_m
 
 
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "SLURM_NTASKS": "2",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "LOCAL_RANK": "0",
         "SLURM_PROCID": "0",
         "SLURM_LOCALID": "0",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=0)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=0)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_accelerator_choice_ddp_cpu_custom_cluster(device_count_mock, setup_distributed_mock):
     """
     Test that we choose the custom cluster even when SLURM or TE flags are around
@@ -405,7 +423,7 @@ def test_accelerator_choice_ddp_cpu_custom_cluster(device_count_mock, setup_dist
     class CustomCluster(LightningEnvironment):
 
         def master_address(self):
-            return 'asdf'
+            return "asdf"
 
         def creates_children(self) -> bool:
             return True
@@ -422,7 +440,7 @@ def test_accelerator_choice_ddp_cpu_custom_cluster(device_count_mock, setup_dist
     trainer = Trainer(
         plugins=[CustomCluster()],
         fast_dev_run=True,
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
         num_processes=2,
         callbacks=[CB()],
     )
@@ -432,16 +450,17 @@ def test_accelerator_choice_ddp_cpu_custom_cluster(device_count_mock, setup_dist
 
 
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "SLURM_NTASKS": "2",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "LOCAL_RANK": "0",
-        "SLURM_LOCALID": "0"
-    }
+        "SLURM_LOCALID": "0",
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=0)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=0)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_custom_accelerator(device_count_mock, setup_distributed_mock):
 
     class Accel(Accelerator):
@@ -488,17 +507,18 @@ def test_custom_accelerator(device_count_mock, setup_distributed_mock):
 
 
 @mock.patch.dict(
-    os.environ, {
+    os.environ,
+    {
         "SLURM_NTASKS": "2",
         "SLURM_JOB_NAME": "SOME_NAME",
         "SLURM_NODEID": "0",
         "LOCAL_RANK": "0",
         "SLURM_PROCID": "0",
         "SLURM_LOCALID": "0",
-    }
+    },
 )
-@mock.patch('torch.cuda.device_count', return_value=0)
-@mock.patch('pytorch_lightning.plugins.DDPPlugin.setup_distributed', autospec=True)
+@mock.patch("torch.cuda.device_count", return_value=0)
+@mock.patch("pytorch_lightning.plugins.DDPPlugin.setup_distributed", autospec=True)
 def test_dist_backend_accelerator_mapping(device_count_mock, setup_distributed_mock):
 
     class CB(Callback):
@@ -512,7 +532,7 @@ def test_dist_backend_accelerator_mapping(device_count_mock, setup_distributed_m
     model = BoringModel()
     trainer = Trainer(
         fast_dev_run=True,
-        accelerator='ddp_cpu',
+        accelerator="ddp_cpu",
         num_processes=2,
         callbacks=[CB()],
     )
@@ -522,7 +542,7 @@ def test_dist_backend_accelerator_mapping(device_count_mock, setup_distributed_m
 
 
 @mock.patch("pytorch_lightning.utilities._IS_INTERACTIVE", return_value=True)
-@mock.patch('torch.cuda.device_count', return_value=2)
+@mock.patch("torch.cuda.device_count", return_value=2)
 def test_ipython_incompatible_backend_error(*_):
     with pytest.raises(MisconfigurationException, match="backend ddp is not compatible"):
         Trainer(accelerator="ddp", gpus=2)
@@ -538,7 +558,7 @@ def test_ipython_compatible_backend(*_):
 
 @pytest.mark.parametrize(
     ["accelerator", "plugin"],
-    [('ddp_spawn', 'ddp_sharded'), (None, 'ddp_sharded')],
+    [("ddp_spawn", "ddp_sharded"), (None, "ddp_sharded")],
 )
 def test_plugin_accelerator_choice(accelerator: Optional[str], plugin: str):
     """Ensure that when a plugin and accelerator is passed in, that the plugin takes precedent."""
@@ -549,18 +569,26 @@ def test_plugin_accelerator_choice(accelerator: Optional[str], plugin: str):
     assert isinstance(trainer.accelerator.training_type_plugin, DDPShardedPlugin)
 
 
-@pytest.mark.parametrize(["accelerator", "plugin"], [
-    ('ddp', DDPPlugin),
-    ('ddp_spawn', DDPSpawnPlugin),
-    ('ddp_sharded', DDPShardedPlugin),
-    ('ddp_sharded_spawn', DDPSpawnShardedPlugin),
-    pytest.param('deepspeed', DeepSpeedPlugin, marks=RunIf(deepspeed=True)),
-])
-@mock.patch('torch.cuda.is_available', return_value=True)
-@mock.patch('torch.cuda.device_count', return_value=2)
+@pytest.mark.parametrize(
+    ["accelerator", "plugin"],
+    [
+        ("ddp", DDPPlugin),
+        ("ddp_spawn", DDPSpawnPlugin),
+        ("ddp_sharded", DDPShardedPlugin),
+        ("ddp_sharded_spawn", DDPSpawnShardedPlugin),
+        pytest.param("deepspeed", DeepSpeedPlugin, marks=RunIf(deepspeed=True)),
+    ],
+)
+@mock.patch("torch.cuda.is_available", return_value=True)
+@mock.patch("torch.cuda.device_count", return_value=2)
 @pytest.mark.parametrize("gpus", [1, 2])
 def test_accelerator_choice_multi_node_gpu(
-    mock_is_available, mock_device_count, tmpdir, accelerator: str, plugin: ParallelPlugin, gpus: int
+    mock_is_available,
+    mock_device_count,
+    tmpdir,
+    accelerator: str,
+    plugin: ParallelPlugin,
+    gpus: int,
 ):
     trainer = Trainer(
         accelerator=accelerator,

@@ -31,20 +31,24 @@ from tests.helpers import BoringModel
 from tests.helpers.runif import RunIf
 
 
-@pytest.mark.parametrize("wrapper_class", [
-    LightningParallelModule,
-    LightningDistributedModule,
-])
 @pytest.mark.parametrize(
-    "stage", [
+    "wrapper_class",
+    [
+        LightningParallelModule,
+        LightningDistributedModule,
+    ],
+)
+@pytest.mark.parametrize(
+    "stage",
+    [
         ("training", "training_step"),
         ("testing", "test_step"),
         ("validating", "validation_step"),
         ("predicting", "predict_step"),
-    ]
+    ],
 )
 def test_lightning_wrapper_module_methods(wrapper_class, stage):
-    """ Test that the LightningWrapper redirects .forward() to the LightningModule methods. """
+    """Test that the LightningWrapper redirects .forward() to the LightningModule methods."""
     pl_module = MagicMock()
     wrapped_module = wrapper_class(pl_module)
 
@@ -62,20 +66,21 @@ def test_lightning_wrapper_module_methods(wrapper_class, stage):
 
 
 @pytest.mark.parametrize(
-    "inp,expected", [
+    "inp,expected",
+    [
         [torch.tensor(1.0), torch.tensor([1.0])],
         [torch.tensor([2.0]), torch.tensor([2.0])],
         [torch.ones(3, 4, 5), torch.ones(3, 4, 5)],
-    ]
+    ],
 )
 def test_unsqueeze_scalar_tensor(inp, expected):
-    """ Test that the utility function unsqueezes only scalar tensors. """
+    """Test that the utility function unsqueezes only scalar tensors."""
     assert torch.all(unsqueeze_scalar_tensor(inp).eq(expected))
 
 
 @RunIf(min_gpus=2)
 def test_lightning_parallel_module_unsqueeze_scalar():
-    """ Test that LightningParallelModule takes care of un-squeezeing 0-dim tensors. """
+    """Test that LightningParallelModule takes care of un-squeezeing 0-dim tensors."""
 
     class TestModel(BoringModel):
 
@@ -107,11 +112,12 @@ def test_lightning_parallel_module_unsqueeze_scalar():
 
 
 @pytest.mark.parametrize(
-    "inp,expected", [
+    "inp,expected",
+    [
         [1.0, torch.tensor([1.0])],
         [2, torch.tensor([2.0])],
         [True, torch.tensor([True])],
-    ]
+    ],
 )
 def test_python_scalar_to_tensor(inp, expected):
     assert torch.all(python_scalar_to_tensor(inp).eq(expected))
@@ -120,7 +126,7 @@ def test_python_scalar_to_tensor(inp, expected):
 @RunIf(min_gpus=1)
 @pytest.mark.parametrize("device", [torch.device("cpu"), torch.device("cuda", 0)])
 def test_lightning_parallel_module_python_scalar_conversion(device):
-    """ Test that LightningParallelModule can convert Python scalars to tensors. """
+    """Test that LightningParallelModule can convert Python scalars to tensors."""
 
     class TestModel(BoringModel):
 
@@ -143,14 +149,15 @@ def test_lightning_parallel_module_python_scalar_conversion(device):
 
 @RunIf(min_gpus=2)
 @pytest.mark.parametrize(
-    "nest, unnest", [
+    "nest, unnest",
+    [
         (lambda x: x, lambda x: x),
         (lambda x: dict(data=x), lambda x: x["data"]),
         (lambda x: [x, (x, x)], lambda x: x[1][0]),
-    ]
+    ],
 )
 def test_lightning_parallel_module_device_access(nest, unnest):
-    """ Test that self.device returns the correct value in replicas of DataParallel. """
+    """Test that self.device returns the correct value in replicas of DataParallel."""
 
     class DeviceAccessModel(LightningModule):
 
@@ -186,7 +193,7 @@ def test_lightning_parallel_module_device_access(nest, unnest):
 
 @RunIf(min_gpus=2)
 def test_lightning_parallel_module_device_access_warning():
-    """ Test that we show a warning when the device can't be inferred from the input. """
+    """Test that we show a warning when the device can't be inferred from the input."""
 
     class DeviceAccessModel(LightningModule):
 

@@ -41,7 +41,7 @@ def test_progress_reset():
 
 
 def test_progress_repr():
-    assert repr(Tracker(ready=None, started=None)) == "Tracker(processed=0, completed=0)"
+    assert (repr(Tracker(ready=None, started=None)) == "Tracker(processed=0, completed=0)")
 
 
 @pytest.mark.parametrize("attr", ("ready", "started", "processed", "completed"))
@@ -56,7 +56,10 @@ def test_base_progress_increment(attr):
 
 def test_base_progress_from_defaults():
     actual = Progress.from_defaults(completed=5, started=None)
-    expected = Progress(total=Tracker(started=None, completed=5), current=Tracker(started=None, completed=5))
+    expected = Progress(
+        total=Tracker(started=None, completed=5),
+        current=Tracker(started=None, completed=5),
+    )
     assert actual == expected
 
 
@@ -70,7 +73,7 @@ def test_loop_progress_increment_epoch():
 
 
 def test_loop_progress_increment_sequence():
-    """ Test sequences for incrementing batches reads and epochs. """
+    """Test sequences for incrementing batches reads and epochs."""
     p = LoopProgress(batch=Progress(total=Tracker(started=None)))
 
     p.batch.increment_ready()

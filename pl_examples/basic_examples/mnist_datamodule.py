@@ -90,7 +90,7 @@ class MNISTDataModule(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         """Split the train and valid dataset"""
-        extra = dict(transform=self.default_transforms) if self.default_transforms else {}
+        extra = (dict(transform=self.default_transforms) if self.default_transforms else {})
         dataset = MNIST(self.data_dir, train=True, download=False, **extra)
         train_length = len(dataset)
         self.dataset_train, self.dataset_val = random_split(dataset, [train_length - self.val_split, self.val_split])
@@ -139,7 +139,8 @@ class MNISTDataModule(LightningDataModule):
             return None
         if self.normalize:
             mnist_transforms = transform_lib.Compose([
-                transform_lib.ToTensor(), transform_lib.Normalize(mean=(0.5, ), std=(0.5, ))
+                transform_lib.ToTensor(),
+                transform_lib.Normalize(mean=(0.5, ), std=(0.5, )),
             ])
         else:
             mnist_transforms = transform_lib.ToTensor()

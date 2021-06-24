@@ -32,7 +32,7 @@ class LightningDeprecationWarning(DeprecationWarning):
 
 
 # enable our warnings
-warnings.simplefilter('default', LightningDeprecationWarning)
+warnings.simplefilter("default", LightningDeprecationWarning)
 
 rank_zero_deprecation = partial(rank_zero_warn, category=LightningDeprecationWarning)
 

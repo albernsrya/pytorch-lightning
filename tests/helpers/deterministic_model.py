@@ -66,12 +66,12 @@ class DeterministicModel(LightningModule):
 
     def validation_step_end(self, val_step_output):
         assert len(val_step_output) == 3
-        assert val_step_output['val_loss'] == 171
-        assert val_step_output['log']['log_acc1'] >= 12
-        assert val_step_output['progress_bar']['pbar_acc1'] == 17
+        assert val_step_output["val_loss"] == 171
+        assert val_step_output["log"]["log_acc1"] >= 12
+        assert val_step_output["progress_bar"]["pbar_acc1"] == 17
         self.validation_step_end_called = True
 
-        val_step_output['val_step_end'] = torch.tensor(1802)
+        val_step_output["val_step_end"] = torch.tensor(1802)
 
         return val_step_output
 
@@ -79,12 +79,12 @@ class DeterministicModel(LightningModule):
         assert len(outputs) == self.trainer.num_val_batches[0]
 
         for i, out in enumerate(outputs):
-            assert out['log']['log_acc1'] >= 12 + i
+            assert out["log"]["log_acc1"] >= 12 + i
 
         self.validation_epoch_end_called = True
 
         result = outputs[-1]
-        result['val_epoch_end'] = torch.tensor(1233)
+        result["val_epoch_end"] = torch.tensor(1233)
         return result
 
     # -----------------------------
@@ -102,13 +102,21 @@ class DeterministicModel(LightningModule):
     def configure_optimizers__lr_on_plateau_epoch(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=0)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        scheduler = {'scheduler': lr_scheduler, 'interval': 'epoch', 'monitor': 'epoch_end_log_1'}
+        scheduler = {
+            "scheduler": lr_scheduler,
+            "interval": "epoch",
+            "monitor": "epoch_end_log_1",
+        }
         return [optimizer], [scheduler]
 
     def configure_optimizers__lr_on_plateau_step(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=0)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        scheduler = {'scheduler': lr_scheduler, 'interval': 'step', 'monitor': 'pbar_acc1'}
+        scheduler = {
+            "scheduler": lr_scheduler,
+            "interval": "step",
+            "monitor": "pbar_acc1",
+        }
         return [optimizer], [scheduler]
 
     def backward(self, loss, optimizer, optimizer_idx):

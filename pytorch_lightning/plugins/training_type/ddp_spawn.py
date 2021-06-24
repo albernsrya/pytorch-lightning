@@ -79,7 +79,7 @@ class DDPSpawnPlugin(ParallelPlugin):
         self._sync_batchnorm = sync_batchnorm or False
         self._ddp_kwargs = kwargs
         self.dist = LightningDistributed()
-        self.num_processes = len(parallel_devices) if parallel_devices is not None else 0
+        self.num_processes = (len(parallel_devices) if parallel_devices is not None else 0)
         self.mp_queue = None
         self._ddp_comm_state = ddp_comm_state
         self._ddp_comm_hook = ddp_comm_hook
@@ -110,7 +110,7 @@ class DDPSpawnPlugin(ParallelPlugin):
         return self._local_rank
 
     def __getstate__(self):
-        """ Makes this plugin pickleable without destroying the queue in the current process. """
+        """Makes this plugin pickleable without destroying the queue in the current process."""
         state = self.__dict__.copy()
         state["mp_queue"] = None
         return state
@@ -227,8 +227,9 @@ class DDPSpawnPlugin(ParallelPlugin):
         # This flag does come with a performance hit, so it is suggested to disable in cases where it is possible.
         self._ddp_kwargs["find_unused_parameters"] = self._ddp_kwargs.get("find_unused_parameters", True)
         # todo: PyTorch 1.7.0 DDP introduces ``self.reducer._rebuild_buckets()`` breaking manual_optimization
-        if _TORCH_GREATER_EQUAL_1_7 and not self.lightning_module.automatic_optimization and not self._ddp_kwargs.get(
-            "find_unused_parameters", False
+        if (
+            _TORCH_GREATER_EQUAL_1_7 and not self.lightning_module.automatic_optimization and
+            not self._ddp_kwargs.get("find_unused_parameters", False)
         ):
             rank_zero_warn(
                 "From PyTorch 1.7.0, Lightning ``manual_optimization`` needs to set ``find_unused_parameters=True`` "
@@ -258,8 +259,8 @@ class DDPSpawnPlugin(ParallelPlugin):
 
     def init_ddp_connection(self, global_rank: Optional[int], world_size: Optional[int]) -> None:
         # TODO: this code is duplicated in DDP and DDPSpawn, make this a function
-        global_rank = global_rank if global_rank is not None else self.cluster_environment.global_rank()
-        world_size = world_size if world_size is not None else self.cluster_environment.world_size()
+        global_rank = (global_rank if global_rank is not None else self.cluster_environment.global_rank())
+        world_size = (world_size if world_size is not None else self.cluster_environment.world_size())
         os.environ["MASTER_ADDR"] = self.cluster_environment.master_address()
         os.environ["MASTER_PORT"] = str(self.cluster_environment.master_port())
 
@@ -274,7 +275,7 @@ class DDPSpawnPlugin(ParallelPlugin):
 
     def transfer_distrib_spawn_state_on_fit_end(self, results):
         checkpoint_callback = self.lightning_module.trainer.checkpoint_callback
-        best_model_path = checkpoint_callback.best_model_path if checkpoint_callback else None
+        best_model_path = (checkpoint_callback.best_model_path if checkpoint_callback else None)
 
         if self.global_rank == 0 and self.mp_queue is not None:
             rank_zero_warn("cleaning up ddp environment...")
@@ -282,8 +283,8 @@ class DDPSpawnPlugin(ParallelPlugin):
             # save the last weights
             last_path = None
             if (
-                self.lightning_module.trainer.state.fn == TrainerFn.FITTING and best_model_path is not None
-                and len(best_model_path) > 0
+                self.lightning_module.trainer.state.fn == TrainerFn.FITTING and best_model_path is not None and
+                len(best_model_path) > 0
             ):
                 last_path = re.sub(".ckpt", ".tmp_end.ckpt", best_model_path)
                 atomic_save(self.on_save(self.lightning_module.state_dict()), last_path)
@@ -297,11 +298,11 @@ class DDPSpawnPlugin(ParallelPlugin):
     def __recover_child_process_weights(self, best_path, last_path):
         # transfer back the best path to the trainer
         if self.lightning_module.trainer.checkpoint_callback:
-            self.lightning_module.trainer.checkpoint_callback.best_model_path = best_path
+            self.lightning_module.trainer.checkpoint_callback.best_model_path = (best_path)
         # todo, pass also best score
 
         # load last weights
-        if last_path is not None and self.lightning_module.trainer.state.fn == TrainerFn.FITTING:
+        if (last_path is not None and self.lightning_module.trainer.state.fn == TrainerFn.FITTING):
             ckpt = pl_load(last_path, map_location=lambda storage, loc: storage)
             self.lightning_module.load_state_dict(ckpt)
 
@@ -317,12 +318,23 @@ class DDPSpawnPlugin(ParallelPlugin):
             torch.cuda.set_device(self.root_device)
         self.model.to(self.root_device)
 
-    def pre_backward(self, closure_loss: torch.Tensor, should_accumulate: bool, optimizer: Optimizer, opt_idx: int):
+    def pre_backward(
+        self,
+        closure_loss: torch.Tensor,
+        should_accumulate: bool,
+        optimizer: Optimizer,
+        opt_idx: int,
+    ):
         """Run before precision plugin executes backward"""
-        if not self.lightning_module.automatic_optimization and self.model.require_backward_grad_sync:
+        if (not self.lightning_module.automatic_optimization and self.model.require_backward_grad_sync):
             prepare_for_backward(self.model, closure_loss)
 
-    def reduce(self, tensor, group: Optional[Any] = None, reduce_op: Union[ReduceOp, str] = "mean") -> torch.Tensor:
+    def reduce(
+        self,
+        tensor,
+        group: Optional[Any] = None,
+        reduce_op: Union[ReduceOp, str] = "mean",
+    ) -> torch.Tensor:
         """
         Reduces a tensor from several distributed processes to one aggregated tensor.
 

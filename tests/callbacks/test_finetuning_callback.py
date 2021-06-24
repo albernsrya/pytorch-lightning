@@ -32,7 +32,7 @@ class TestBackboneFinetuningCallback(BackboneFinetuning):
         epoch = trainer.current_epoch
         if self.unfreeze_backbone_at_epoch <= epoch:
             optimizer = trainer.optimizers[0]
-            current_lr = optimizer.param_groups[0]['lr']
+            current_lr = optimizer.param_groups[0]["lr"]
             backbone_lr = self.previous_backbone_lr
             if epoch < 6:
                 assert backbone_lr <= current_lr
@@ -92,7 +92,11 @@ class TestBackboneFinetuningWarningCallback(BackboneFinetuning):
 
         if epoch == 0:
             self.unfreeze_and_add_param_group(
-                pl_module.backbone, optimizer, 0.1, train_bn=self.train_bn, initial_denom_lr=self.initial_denom_lr
+                pl_module.backbone,
+                optimizer,
+                0.1,
+                train_bn=self.train_bn,
+                initial_denom_lr=self.initial_denom_lr,
             )
 
 
@@ -263,15 +267,20 @@ def test_base_finetuning_internal_state(tmpdir):
     cb = OnEpochLayerFinetuning()
     chk = ModelCheckpoint(dirpath=tmpdir, save_last=True)
     model = FreezeModel()
-    trainer = Trainer(default_root_dir=tmpdir, max_epochs=5, limit_train_batches=1, callbacks=[cb, chk])
+    trainer = Trainer(
+        default_root_dir=tmpdir,
+        max_epochs=5,
+        limit_train_batches=1,
+        callbacks=[cb, chk],
+    )
     trainer.fit(model)
     assert len(cb._internal_state[0]) == 6
-    assert cb._internal_state[0][0]["params"] == ['layer.0.weight']
-    assert cb._internal_state[0][1]["params"] == ['layer.1.weight', 'layer.1.bias']
-    assert cb._internal_state[0][2]["params"] == ['layer.2.weight']
-    assert cb._internal_state[0][3]["params"] == ['layer.3.weight', 'layer.3.bias']
-    assert cb._internal_state[0][4]["params"] == ['layer.4.weight']
-    assert cb._internal_state[0][5]["params"] == ['layer.5.weight', 'layer.5.bias']
+    assert cb._internal_state[0][0]["params"] == ["layer.0.weight"]
+    assert cb._internal_state[0][1]["params"] == ["layer.1.weight", "layer.1.bias"]
+    assert cb._internal_state[0][2]["params"] == ["layer.2.weight"]
+    assert cb._internal_state[0][3]["params"] == ["layer.3.weight", "layer.3.bias"]
+    assert cb._internal_state[0][4]["params"] == ["layer.4.weight"]
+    assert cb._internal_state[0][5]["params"] == ["layer.5.weight", "layer.5.bias"]
 
     model = FreezeModel()
     cb = OnEpochLayerFinetuning()

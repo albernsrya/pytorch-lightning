@@ -42,37 +42,37 @@ class DoublePrecisionBoringModel(BoringModel):
 
     def training_step(self, batch, batch_idx):
         float_data, int_data = batch
-        assert torch.tensor([0.]).dtype == torch.float64
-        assert torch.tensor([0.], dtype=torch.float16).dtype == torch.float16
+        assert torch.tensor([0.0]).dtype == torch.float64
+        assert torch.tensor([0.0], dtype=torch.float16).dtype == torch.float16
         assert float_data.dtype == torch.float64
         output = self(float_data)
         loss = self.loss(batch, output)
         return {"loss": loss}
 
     def training_epoch_end(self, outputs) -> None:
-        assert torch.tensor([0.]).dtype == torch.float32
+        assert torch.tensor([0.0]).dtype == torch.float32
         return super().training_epoch_end(outputs)
 
     def validation_step(self, batch, batch_idx):
         assert batch.dtype == torch.float64
-        assert torch.tensor([0.]).dtype == torch.float64
-        assert torch.tensor([0.], dtype=torch.float16).dtype == torch.float16
+        assert torch.tensor([0.0]).dtype == torch.float64
+        assert torch.tensor([0.0], dtype=torch.float16).dtype == torch.float16
         output = self(batch)
         loss = self.loss(batch, output)
         return {"x": loss}
 
     def test_step(self, batch, batch_idx):
         assert batch.dtype == torch.float64
-        assert torch.tensor([0.]).dtype == torch.float64
-        assert torch.tensor([0.], dtype=torch.float16).dtype == torch.float16
+        assert torch.tensor([0.0]).dtype == torch.float64
+        assert torch.tensor([0.0], dtype=torch.float16).dtype == torch.float16
         output = self(batch)
         loss = self.loss(batch, output)
         return {"y": loss}
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         assert batch.dtype == torch.float64
-        assert torch.tensor([0.]).dtype == torch.float64
-        assert torch.tensor([0.], dtype=torch.float16).dtype == torch.float16
+        assert torch.tensor([0.0]).dtype == torch.float64
+        assert torch.tensor([0.0], dtype=torch.float16).dtype == torch.float16
         return self(batch)
 
     def on_fit_start(self):
@@ -123,7 +123,7 @@ class DoublePrecisionBoringModelNoForward(BoringModel):
         return DataLoader(RandomDataset(32, 64))
 
 
-@pytest.mark.parametrize('boring_model', (DoublePrecisionBoringModel, DoublePrecisionBoringModelNoForward))
+@pytest.mark.parametrize("boring_model", (DoublePrecisionBoringModel, DoublePrecisionBoringModelNoForward))
 def test_double_precision(tmpdir, boring_model):
     model = boring_model()
 
@@ -146,7 +146,7 @@ def test_double_precision_ddp(tmpdir):
     trainer = Trainer(
         max_epochs=1,
         default_root_dir=tmpdir,
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         gpus=2,
         fast_dev_run=2,
         precision=64,

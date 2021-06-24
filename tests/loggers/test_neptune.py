@@ -20,11 +20,11 @@ from pytorch_lightning.loggers import NeptuneLogger
 from tests.helpers import BoringModel
 
 
-@patch('pytorch_lightning.loggers.neptune.neptune')
+@patch("pytorch_lightning.loggers.neptune.neptune")
 def test_neptune_online(neptune):
-    logger = NeptuneLogger(api_key='test', project_name='project')
+    logger = NeptuneLogger(api_key="test", project_name="project")
 
-    created_experiment = neptune.Session.with_default_backend().get_project().create_experiment()
+    created_experiment = (neptune.Session.with_default_backend().get_project().create_experiment())
 
     # It's important to check if the internal variable _experiment was initialized in __init__.
     # Calling logger.experiment would cause a side-effect of initializing _experiment,
@@ -36,19 +36,19 @@ def test_neptune_online(neptune):
     assert logger.version == created_experiment.id
 
 
-@patch('pytorch_lightning.loggers.neptune.neptune')
+@patch("pytorch_lightning.loggers.neptune.neptune")
 def test_neptune_existing_experiment(neptune):
-    logger = NeptuneLogger(experiment_id='TEST-123')
+    logger = NeptuneLogger(experiment_id="TEST-123")
     neptune.Session.with_default_backend().get_project().get_experiments.assert_not_called()
     experiment = logger.experiment
-    neptune.Session.with_default_backend().get_project().get_experiments.assert_called_once_with(id='TEST-123')
-    assert logger.experiment_name == experiment.get_system_properties()['name']
+    neptune.Session.with_default_backend().get_project().get_experiments.assert_called_once_with(id="TEST-123")
+    assert logger.experiment_name == experiment.get_system_properties()["name"]
     assert logger.params == experiment.get_parameters()
     assert logger.properties == experiment.get_properties()
     assert logger.tags == experiment.get_tags()
 
 
-@patch('pytorch_lightning.loggers.neptune.neptune')
+@patch("pytorch_lightning.loggers.neptune.neptune")
 def test_neptune_offline(neptune):
     logger = NeptuneLogger(offline_mode=True)
     neptune.Session.assert_not_called()
@@ -57,51 +57,51 @@ def test_neptune_offline(neptune):
     assert logger.experiment == neptune.Session().get_project().create_experiment()
 
 
-@patch('pytorch_lightning.loggers.neptune.neptune')
+@patch("pytorch_lightning.loggers.neptune.neptune")
 def test_neptune_additional_methods(neptune):
-    logger = NeptuneLogger(api_key='test', project_name='project')
+    logger = NeptuneLogger(api_key="test", project_name="project")
 
-    created_experiment = neptune.Session.with_default_backend().get_project().create_experiment()
+    created_experiment = (neptune.Session.with_default_backend().get_project().create_experiment())
 
-    logger.log_metric('test', torch.ones(1))
-    created_experiment.log_metric.assert_called_once_with('test', torch.ones(1))
+    logger.log_metric("test", torch.ones(1))
+    created_experiment.log_metric.assert_called_once_with("test", torch.ones(1))
     created_experiment.log_metric.reset_mock()
 
-    logger.log_metric('test', 1.0)
-    created_experiment.log_metric.assert_called_once_with('test', 1.0)
+    logger.log_metric("test", 1.0)
+    created_experiment.log_metric.assert_called_once_with("test", 1.0)
     created_experiment.log_metric.reset_mock()
 
-    logger.log_metric('test', 1.0, step=2)
-    created_experiment.log_metric.assert_called_once_with('test', x=2, y=1.0)
+    logger.log_metric("test", 1.0, step=2)
+    created_experiment.log_metric.assert_called_once_with("test", x=2, y=1.0)
     created_experiment.log_metric.reset_mock()
 
-    logger.log_text('test', 'text')
-    created_experiment.log_text.assert_called_once_with('test', 'text')
+    logger.log_text("test", "text")
+    created_experiment.log_text.assert_called_once_with("test", "text")
     created_experiment.log_text.reset_mock()
 
-    logger.log_image('test', 'image file')
-    created_experiment.log_image.assert_called_once_with('test', 'image file')
+    logger.log_image("test", "image file")
+    created_experiment.log_image.assert_called_once_with("test", "image file")
     created_experiment.log_image.reset_mock()
 
-    logger.log_image('test', 'image file', step=2)
-    created_experiment.log_image.assert_called_once_with('test', x=2, y='image file')
+    logger.log_image("test", "image file", step=2)
+    created_experiment.log_image.assert_called_once_with("test", x=2, y="image file")
     created_experiment.log_image.reset_mock()
 
-    logger.log_artifact('file')
-    created_experiment.log_artifact.assert_called_once_with('file', None)
+    logger.log_artifact("file")
+    created_experiment.log_artifact.assert_called_once_with("file", None)
 
-    logger.set_property('property', 10)
-    created_experiment.set_property.assert_called_once_with('property', 10)
+    logger.set_property("property", 10)
+    created_experiment.set_property.assert_called_once_with("property", 10)
 
-    logger.append_tags('one tag')
-    created_experiment.append_tags.assert_called_once_with('one tag')
+    logger.append_tags("one tag")
+    created_experiment.append_tags.assert_called_once_with("one tag")
     created_experiment.append_tags.reset_mock()
 
-    logger.append_tags(['two', 'tags'])
-    created_experiment.append_tags.assert_called_once_with('two', 'tags')
+    logger.append_tags(["two", "tags"])
+    created_experiment.append_tags.assert_called_once_with("two", "tags")
 
 
-@patch('pytorch_lightning.loggers.neptune.neptune')
+@patch("pytorch_lightning.loggers.neptune.neptune")
 def test_neptune_leave_open_experiment_after_fit(neptune, tmpdir):
     """Verify that neptune experiment was closed after training"""
     model = BoringModel()

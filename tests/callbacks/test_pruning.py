@@ -84,7 +84,10 @@ def train_with_pruning_callback(
         "verbose": 1,
     }
     if parameters_to_prune:
-        pruning_kwargs["parameters_to_prune"] = [(model.layer.mlp_1, "weight"), (model.layer.mlp_2, "weight")]
+        pruning_kwargs["parameters_to_prune"] = [
+            (model.layer.mlp_1, "weight"),
+            (model.layer.mlp_2, "weight"),
+        ]
     else:
         if isinstance(pruning_fn, str) and pruning_fn.endswith("_structured"):
             pruning_kwargs["parameter_names"] = ["weight"]
@@ -96,8 +99,11 @@ def train_with_pruning_callback(
         pruning_kwargs["pruning_norm"] = 1
 
     # Misconfiguration checks
-    if isinstance(pruning_fn, str) and pruning_fn.endswith("_structured") and use_global_unstructured:
-        with pytest.raises(MisconfigurationException, match="is supported with `use_global_unstructured=True`"):
+    if (isinstance(pruning_fn, str) and pruning_fn.endswith("_structured") and use_global_unstructured):
+        with pytest.raises(
+            MisconfigurationException,
+            match="is supported with `use_global_unstructured=True`",
+        ):
             ModelPruning(**pruning_kwargs)
         return
     if ModelPruning._is_pruning_method(pruning_fn) and not use_global_unstructured:
@@ -138,19 +144,32 @@ def test_pruning_misconfiguration():
         ModelPruning(pruning_fn="random_structured")
     with pytest.raises(MisconfigurationException, match=r"must be any of \(0, 1, 2\)"):
         ModelPruning(pruning_fn="l1_unstructured", verbose=3)
-    with pytest.raises(MisconfigurationException, match="requesting `ln_structured` pruning, the `pruning_norm`"):
+    with pytest.raises(
+        MisconfigurationException,
+        match="requesting `ln_structured` pruning, the `pruning_norm`",
+    ):
         ModelPruning(pruning_fn="ln_structured", pruning_dim=0)
 
 
 @pytest.mark.parametrize("parameters_to_prune", [False, True])
 @pytest.mark.parametrize("use_global_unstructured", [False, True])
 @pytest.mark.parametrize(
-    "pruning_fn", ["l1_unstructured", "random_unstructured", "ln_structured", "random_structured", TestPruningMethod]
+    "pruning_fn",
+    [
+        "l1_unstructured",
+        "random_unstructured",
+        "ln_structured",
+        "random_structured",
+        TestPruningMethod,
+    ],
 )
 @pytest.mark.parametrize("use_lottery_ticket_hypothesis", [False, True])
 def test_pruning_callback(
-    tmpdir, use_global_unstructured: bool, parameters_to_prune: bool,
-    pruning_fn: Union[str, pytorch_prune.BasePruningMethod], use_lottery_ticket_hypothesis: bool
+    tmpdir,
+    use_global_unstructured: bool,
+    parameters_to_prune: bool,
+    pruning_fn: Union[str, pytorch_prune.BasePruningMethod],
+    use_lottery_ticket_hypothesis: bool,
 ):
     train_with_pruning_callback(
         tmpdir,
@@ -200,12 +219,17 @@ def test_pruning_lth_callable(tmpdir, resample_parameters: bool):
                 for i, name in names:
                     curr, curr_name = self._parameters_to_prune[i]
                     assert name == curr_name
-                    actual, expected = getattr(curr, name).data, getattr(copy, name).data
+                    actual, expected = (
+                        getattr(curr, name).data,
+                        getattr(copy, name).data,
+                    )
                     allclose = torch.allclose(actual, expected)
                     assert not allclose if self._resample_parameters else allclose
 
     pruning = ModelPruningTestCallback(
-        "l1_unstructured", use_lottery_ticket_hypothesis=lambda e: bool(e % 2), resample_parameters=resample_parameters
+        "l1_unstructured",
+        use_lottery_ticket_hypothesis=lambda e: bool(e % 2),
+        resample_parameters=resample_parameters,
     )
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -227,12 +251,25 @@ def test_pruning_lth_callable(tmpdir, resample_parameters: bool):
 def test_multiple_pruning_callbacks(tmpdir, caplog, make_pruning_permanent: bool):
     model = TestModel()
     pruning_kwargs = {
-        'parameters_to_prune': [(model.layer.mlp_1, "weight"), (model.layer.mlp_3, "weight")],
-        'verbose': 2,
-        "make_pruning_permanent": make_pruning_permanent
+        "parameters_to_prune": [
+            (model.layer.mlp_1, "weight"),
+            (model.layer.mlp_3, "weight"),
+        ],
+        "verbose": 2,
+        "make_pruning_permanent": make_pruning_permanent,
     }
-    p1 = ModelPruning("l1_unstructured", amount=0.5, apply_pruning=lambda e: not e % 2, **pruning_kwargs)
-    p2 = ModelPruning("random_unstructured", amount=0.25, apply_pruning=lambda e: e % 2, **pruning_kwargs)
+    p1 = ModelPruning(
+        "l1_unstructured",
+        amount=0.5,
+        apply_pruning=lambda e: not e % 2,
+        **pruning_kwargs,
+    )
+    p2 = ModelPruning(
+        "random_unstructured",
+        amount=0.25,
+        apply_pruning=lambda e: e % 2,
+        **pruning_kwargs,
+    )
 
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -300,7 +337,11 @@ def test_permanent_when_model_is_saved_multiple_times(tmpdir, caplog, on_train_e
         prune_on_train_epoch_end=on_train_epoch_end,
     )
     ckpt_callback = ModelCheckpoint(monitor="test", save_top_k=2, save_last=True)
-    trainer = Trainer(callbacks=[pruning_callback, ckpt_callback], max_epochs=3, progress_bar_refresh_rate=0)
+    trainer = Trainer(
+        callbacks=[pruning_callback, ckpt_callback],
+        max_epochs=3,
+        progress_bar_refresh_rate=0,
+    )
     with caplog.at_level(INFO):
         trainer.fit(model)
 

@@ -31,7 +31,7 @@ if _FAIRSCALE_AVAILABLE:
 
 
 class DDPShardedPlugin(DDPPlugin):
-    """ Optimizer and gradient sharded training provided by FairScale. """
+    """Optimizer and gradient sharded training provided by FairScale."""
 
     _REDUCE_BUFFER_SIZE_DEFAULT = 2**23  # 8M
 
@@ -94,7 +94,13 @@ class DDPShardedPlugin(DDPPlugin):
             )
         return unwrap_lightning_module_sharded(self._model)
 
-    def pre_backward(self, closure_loss: torch.Tensor, should_accumulate: bool, optimizer: Optimizer, opt_idx: int):
+    def pre_backward(
+        self,
+        closure_loss: torch.Tensor,
+        should_accumulate: bool,
+        optimizer: Optimizer,
+        opt_idx: int,
+    ):
         pass
 
     def post_training_step(self):

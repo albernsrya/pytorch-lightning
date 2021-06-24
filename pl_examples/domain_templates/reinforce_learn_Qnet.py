@@ -78,7 +78,7 @@ class DQN(nn.Module):
 
 
 # Named tuple for storing experience steps gathered in training
-Experience = namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
+Experience = namedtuple("Experience", field_names=["state", "action", "reward", "done", "new_state"])
 
 
 class ReplayBuffer:
@@ -188,7 +188,7 @@ class Agent:
         else:
             state = torch.tensor([self.state])
 
-            if device not in ['cpu']:
+            if device not in ["cpu"]:
                 state = state.cuda(device)
 
             q_values = net(state)
@@ -198,7 +198,7 @@ class Agent:
         return action
 
     @torch.no_grad()
-    def play_step(self, net: nn.Module, epsilon: float = 0.0, device: str = 'cpu') -> Tuple[float, bool]:
+    def play_step(self, net: nn.Module, epsilon: float = 0.0, device: str = "cpu") -> Tuple[float, bool]:
         """
         Carries out a single interaction step between the agent and the environment
 
@@ -227,7 +227,7 @@ class Agent:
 
 
 class DQNLightning(pl.LightningModule):
-    """ Basic DQN Model
+    """Basic DQN Model
 
     >>> DQNLightning(env="CartPole-v1")  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     DQNLightning(
@@ -316,7 +316,7 @@ class DQNLightning(pl.LightningModule):
         """
         states, actions, rewards, dones, next_states = batch
 
-        state_action_values = self.net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
+        state_action_values = (self.net(states).gather(1, actions.unsqueeze(-1)).squeeze(-1))
 
         with torch.no_grad():
             next_state_values = self.target_net(next_states).max(1)[0]
@@ -358,12 +358,12 @@ class DQNLightning(pl.LightningModule):
             self.target_net.load_state_dict(self.net.state_dict())
 
         log = {
-            'total_reward': torch.tensor(self.total_reward).to(device),
-            'reward': torch.tensor(reward).to(device),
-            'steps': torch.tensor(self.global_step).to(device)
+            "total_reward": torch.tensor(self.total_reward).to(device),
+            "reward": torch.tensor(reward).to(device),
+            "steps": torch.tensor(self.global_step).to(device),
         }
 
-        return OrderedDict({'loss': loss, 'log': log, 'progress_bar': log})
+        return OrderedDict({"loss": loss, "log": log, "progress_bar": log})
 
     def configure_optimizers(self) -> List[Optimizer]:
         """Initialize Adam optimizer"""
@@ -386,7 +386,7 @@ class DQNLightning(pl.LightningModule):
 
     def get_device(self, batch) -> str:
         """Retrieve device currently being used by minibatch"""
-        return batch[0].device.index if self.on_gpu else 'cpu'
+        return batch[0].device.index if self.on_gpu else "cpu"
 
     @staticmethod
     def add_model_specific_args(parent_parser):  # pragma: no-cover
@@ -395,15 +395,30 @@ class DQNLightning(pl.LightningModule):
         parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
         parser.add_argument("--env", type=str, default="CartPole-v1", help="gym environment tag")
         parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
-        parser.add_argument("--sync_rate", type=int, default=10, help="how many frames do we update the target network")
-        parser.add_argument("--replay_size", type=int, default=1000, help="capacity of the replay buffer")
+        parser.add_argument(
+            "--sync_rate",
+            type=int,
+            default=10,
+            help="how many frames do we update the target network",
+        )
+        parser.add_argument(
+            "--replay_size",
+            type=int,
+            default=1000,
+            help="capacity of the replay buffer",
+        )
         parser.add_argument(
             "--warm_start_steps",
             type=int,
             default=1000,
-            help="how many samples do we use to fill our buffer at the start of training"
+            help="how many samples do we use to fill our buffer at the start of training",
         )
-        parser.add_argument("--eps_last_frame", type=int, default=1000, help="what frame should epsilon stop decaying")
+        parser.add_argument(
+            "--eps_last_frame",
+            type=int,
+            default=1000,
+            help="what frame should epsilon stop decaying",
+        )
         parser.add_argument("--eps_start", type=float, default=1.0, help="starting value of epsilon")
         parser.add_argument("--eps_end", type=float, default=0.01, help="final value of epsilon")
         parser.add_argument("--episode_length", type=int, default=200, help="max length of an episode")
@@ -415,14 +430,14 @@ def main(args) -> None:
 
     trainer = pl.Trainer(
         gpus=1,
-        accelerator='dp',
+        accelerator="dp",
         val_check_interval=100,
     )
 
     trainer.fit(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_lightning_logo()
     torch.manual_seed(0)
     np.random.seed(0)

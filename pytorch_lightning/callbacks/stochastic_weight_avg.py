@@ -107,7 +107,7 @@ class StochasticWeightAveraging(Callback):
         wrong_type = not isinstance(swa_lrs, (float, list))
         wrong_float = isinstance(swa_lrs, float) and swa_lrs <= 0
         wrong_list = isinstance(swa_lrs, list) and not all(lr > 0 and isinstance(lr, float) for lr in swa_lrs)
-        if (swa_lrs is not None and (wrong_type or wrong_float or wrong_list)):
+        if swa_lrs is not None and (wrong_type or wrong_float or wrong_list):
             raise MisconfigurationException("The `swa_lrs` should be a positive float or a list of positive float.")
 
         if avg_fn is not None and not isinstance(avg_fn, Callable):
@@ -134,14 +134,14 @@ class StochasticWeightAveraging(Callback):
         return self._max_epochs - 1  # 0-based
 
     @staticmethod
-    def pl_module_contains_batch_norm(pl_module: 'pl.LightningModule'):
+    def pl_module_contains_batch_norm(pl_module: "pl.LightningModule"):
         return any(isinstance(module, nn.modules.batchnorm._BatchNorm) for module in pl_module.modules())
 
-    def on_before_accelerator_backend_setup(self, trainer: 'pl.Trainer', pl_module: 'pl.LightningModule'):
+    def on_before_accelerator_backend_setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"):
         # copy the model before moving it to accelerator device.
         self._average_model = deepcopy(pl_module)
 
-    def on_fit_start(self, trainer: 'pl.Trainer', pl_module: 'pl.LightningModule'):
+    def on_fit_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"):
         optimizers = trainer.optimizers
         lr_schedulers = trainer.lr_schedulers
 
@@ -161,7 +161,7 @@ class StochasticWeightAveraging(Callback):
             # virtually increase max_epochs to perform batch norm update on latest epoch.
             trainer.fit_loop.max_epochs += 1
 
-    def on_train_epoch_start(self, trainer: 'pl.Trainer', pl_module: 'pl.LightningModule'):
+    def on_train_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"):
         if trainer.current_epoch == self.swa_start:
             # move average model to request device.
             self._average_model = self._average_model.to(self._device or pl_module.device)
@@ -187,15 +187,15 @@ class StochasticWeightAveraging(Callback):
                 swa_lr=initial_lr,
                 anneal_epochs=self._annealing_epochs,
                 anneal_strategy=self._annealing_strategy,
-                last_epoch=trainer.max_epochs if self._annealing_strategy == "cos" else -1
+                last_epoch=trainer.max_epochs if self._annealing_strategy == "cos" else -1,
             )
             default_scheduler_cfg = _get_default_scheduler_config()
-            assert default_scheduler_cfg["interval"] == "epoch" and default_scheduler_cfg["frequency"] == 1
+            assert (default_scheduler_cfg["interval"] == "epoch" and default_scheduler_cfg["frequency"] == 1)
             default_scheduler_cfg["scheduler"] = self._swa_scheduler
 
             if trainer.lr_schedulers:
                 scheduler_cfg = trainer.lr_schedulers[0]
-                if scheduler_cfg["interval"] != "epoch" or scheduler_cfg["frequency"] != 1:
+                if (scheduler_cfg["interval"] != "epoch" or scheduler_cfg["frequency"] != 1):
                     rank_zero_warn(f"SWA is currently only supported every epoch. Found {scheduler_cfg}")
                 rank_zero_info(f"Swapping scheduler {scheduler_cfg['scheduler']} for {self._swa_scheduler}")
                 trainer.lr_schedulers[0] = default_scheduler_cfg
@@ -224,11 +224,11 @@ class StochasticWeightAveraging(Callback):
             self._accumulate_grad_batches = trainer.accumulate_grad_batches
             trainer.accumulate_grad_batches = len(trainer.train_dataloader)
 
-    def on_train_epoch_end(self, trainer: 'pl.Trainer', *args):
+    def on_train_epoch_end(self, trainer: "pl.Trainer", *args):
         trainer.fit_loop._skip_backward = False
 
-    def on_train_end(self, trainer: 'pl.Trainer', pl_module: 'pl.LightningModule'):
-        if self._model_contains_batch_norm and trainer.current_epoch == self.swa_end + 1:
+    def on_train_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"):
+        if (self._model_contains_batch_norm and trainer.current_epoch == self.swa_end + 1):
             # BatchNorm epoch update. Reset state
             trainer.accumulate_grad_batches = self._accumulate_grad_batches
             trainer.num_training_batches -= 1
@@ -239,11 +239,11 @@ class StochasticWeightAveraging(Callback):
             self.transfer_weights(self._average_model, pl_module)
 
     @staticmethod
-    def transfer_weights(src_pl_module: 'pl.LightningModule', dst_pl_module: 'pl.LightningModule'):
+    def transfer_weights(src_pl_module: "pl.LightningModule", dst_pl_module: "pl.LightningModule"):
         for src_param, dst_param in zip(src_pl_module.parameters(), dst_pl_module.parameters()):
             dst_param.detach().copy_(src_param.to(dst_param.device))
 
-    def reset_batch_norm_and_save_state(self, pl_module: 'pl.LightningModule'):
+    def reset_batch_norm_and_save_state(self, pl_module: "pl.LightningModule"):
         """
         Adapted from https://github.com/pytorch/pytorch/blob/v1.7.1/torch/optim/swa_utils.py#L140-L154
         """
@@ -252,10 +252,14 @@ class StochasticWeightAveraging(Callback):
             if not isinstance(module, nn.modules.batchnorm._BatchNorm):
                 continue
             module.running_mean = torch.zeros_like(
-                module.running_mean, device=pl_module.device, dtype=module.running_mean.dtype
+                module.running_mean,
+                device=pl_module.device,
+                dtype=module.running_mean.dtype,
             )
             module.running_var = torch.ones_like(
-                module.running_var, device=pl_module.device, dtype=module.running_var.dtype
+                module.running_var,
+                device=pl_module.device,
+                dtype=module.running_var.dtype,
             )
             self.momenta[module] = module.momentum
             module.momentum = None
@@ -270,7 +274,10 @@ class StochasticWeightAveraging(Callback):
 
     @staticmethod
     def update_parameters(
-        average_model: 'pl.LightningModule', model: 'pl.LightningModule', n_averaged: torch.LongTensor, avg_fn: _AVG_FN
+        average_model: "pl.LightningModule",
+        model: "pl.LightningModule",
+        n_averaged: torch.LongTensor,
+        avg_fn: _AVG_FN,
     ):
         """
         Adapted from https://github.com/pytorch/pytorch/blob/v1.7.1/torch/optim/swa_utils.py#L104-L112
@@ -279,13 +286,15 @@ class StochasticWeightAveraging(Callback):
             device = p_swa.device
             p_swa_ = p_swa.detach()
             p_model_ = p_model.detach().to(device)
-            src = p_model_ if n_averaged == 0 else avg_fn(p_swa_, p_model_, n_averaged.to(device))
+            src = (p_model_ if n_averaged == 0 else avg_fn(p_swa_, p_model_, n_averaged.to(device)))
             p_swa_.copy_(src)
         n_averaged += 1
 
     @staticmethod
     def avg_fn(
-        averaged_model_parameter: torch.Tensor, model_parameter: torch.Tensor, num_averaged: torch.LongTensor
+        averaged_model_parameter: torch.Tensor,
+        model_parameter: torch.Tensor,
+        num_averaged: torch.LongTensor,
     ) -> torch.FloatTensor:
         """
         Adapted from https://github.com/pytorch/pytorch/blob/v1.7.1/torch/optim/swa_utils.py#L95-L97

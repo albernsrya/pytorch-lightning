@@ -11,7 +11,7 @@ from tests.helpers.runif import RunIf
 
 
 def setup_ddp(rank, world_size):
-    """ Setup ddp enviroment """
+    """Setup ddp enviroment"""
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = "8088"
 
@@ -61,10 +61,10 @@ def test_all_gather_collection(tmpdir):
                 "losses_tensor_float": torch.rand(2, 2).t(),
                 "losses_np_ndarray": np.array([1, 2, 3]),
                 "losses_bool": [True, False],
-                "losses_float": [0., 1., 2.],
+                "losses_float": [0.0, 1.0, 2.0],
                 "losses_int": [0, 1, 2],
                 "losses": losses,
-                "losses_list": [losses, losses]
+                "losses_list": [losses, losses],
             })
             assert gathered_loss["losses_tensor_int"][0].dtype == torch.int32
             assert gathered_loss["losses_tensor_float"][0].dtype == torch.float

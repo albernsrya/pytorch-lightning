@@ -75,7 +75,11 @@ def to_categorical(tensor: torch.Tensor, argmax_dim: int = 1) -> torch.Tensor:
 
 
 @deprecated_metrics(target=_get_num_classes, skip_if=_TORCHMETRICS_GREATER_EQUAL_0_3)
-@deprecated_metrics(target=_get_num_classes, args_mapping=dict(pred="preds"), skip_if=_TORCHMETRICS_LOWER_THAN_0_3)
+@deprecated_metrics(
+    target=_get_num_classes,
+    args_mapping=dict(pred="preds"),
+    skip_if=_TORCHMETRICS_LOWER_THAN_0_3,
+)
 def get_num_classes(pred: torch.Tensor, target: torch.Tensor, num_classes: Optional[int] = None) -> int:
     """
     .. deprecated::
@@ -95,7 +99,10 @@ def reduce(to_reduce: torch.Tensor, reduction: str) -> torch.Tensor:
 
 @deprecated_metrics(target=_class_reduce)
 def class_reduce(
-    num: torch.Tensor, denom: torch.Tensor, weights: torch.Tensor, class_reduction: str = "none"
+    num: torch.Tensor,
+    denom: torch.Tensor,
+    weights: torch.Tensor,
+    class_reduction: str = "none",
 ) -> torch.Tensor:
     """
     .. deprecated::

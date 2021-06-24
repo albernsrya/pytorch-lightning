@@ -69,16 +69,16 @@ class LitClassifier(pl.LightningModule):
     def validation_epoch_end(self, outputs) -> None:
         # since the training step/validation step and test step are run on the IPU device
         # we must log the average loss outside the step functions.
-        self.log('val_acc', torch.stack(outputs).mean(), prog_bar=True)
+        self.log("val_acc", torch.stack(outputs).mean(), prog_bar=True)
 
     def test_epoch_end(self, outputs) -> None:
-        self.log('test_acc', torch.stack(outputs).mean())
+        self.log("test_acc", torch.stack(outputs).mean())
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dm = MNISTDataModule(batch_size=32)
 
     model = LitClassifier()

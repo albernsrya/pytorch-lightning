@@ -34,7 +34,7 @@ def test_logdir(tmpdir):
     """
     Tests that the path is correct when checkpoint and loggers are used
     """
-    expected = os.path.join(tmpdir, 'lightning_logs', 'version_0')
+    expected = os.path.join(tmpdir, "lightning_logs", "version_0")
 
     model = TestModel(expected)
 
@@ -53,7 +53,7 @@ def test_logdir_no_checkpoint_cb(tmpdir):
     """
     Tests that the path is correct with no checkpoint
     """
-    expected = os.path.join(tmpdir, 'lightning_logs', 'version_0')
+    expected = os.path.join(tmpdir, "lightning_logs", "version_0")
     model = TestModel(expected)
 
     trainer = Trainer(
@@ -109,13 +109,13 @@ def test_logdir_custom_callback(tmpdir):
     """
     Tests that the path is correct even when there is a custom callback
     """
-    expected = os.path.join(tmpdir, 'lightning_logs', 'version_0')
+    expected = os.path.join(tmpdir, "lightning_logs", "version_0")
     model = TestModel(expected)
 
     trainer = Trainer(
         default_root_dir=tmpdir,
         max_steps=2,
-        callbacks=[ModelCheckpoint(dirpath=os.path.join(tmpdir, 'ckpts'))],
+        callbacks=[ModelCheckpoint(dirpath=os.path.join(tmpdir, "ckpts"))],
     )
 
     assert trainer.log_dir == expected
@@ -127,14 +127,14 @@ def test_logdir_custom_logger(tmpdir):
     """
     Tests that the path is correct even when there is a custom logger
     """
-    expected = os.path.join(tmpdir, 'custom_logs', 'version_0')
+    expected = os.path.join(tmpdir, "custom_logs", "version_0")
     model = TestModel(expected)
 
     trainer = Trainer(
         default_root_dir=tmpdir,
         max_steps=2,
         callbacks=[ModelCheckpoint(dirpath=tmpdir)],
-        logger=TensorBoardLogger(save_dir=tmpdir, name='custom_logs')
+        logger=TensorBoardLogger(save_dir=tmpdir, name="custom_logs"),
     )
 
     assert trainer.log_dir == expected

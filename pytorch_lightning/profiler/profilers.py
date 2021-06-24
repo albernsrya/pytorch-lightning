@@ -11,10 +11,10 @@ from pytorch_lightning.profiler.pytorch import PyTorchProfiler  # noqa E402
 from pytorch_lightning.profiler.simple import SimpleProfiler  # noqa E402
 
 __all__ = [
-    'AbstractProfiler',
-    'BaseProfiler',
-    'AdvancedProfiler',
-    'PassThroughProfiler',
-    'PyTorchProfiler',
-    'SimpleProfiler',
+    "AbstractProfiler",
+    "BaseProfiler",
+    "AdvancedProfiler",
+    "PassThroughProfiler",
+    "PyTorchProfiler",
+    "SimpleProfiler",
 ]

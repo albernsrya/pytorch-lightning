@@ -124,7 +124,7 @@ class CometLogger(LightningLoggerBase):
             If neither ``api_key`` nor ``save_dir`` are passed as arguments.
     """
 
-    LOGGER_JOIN_CHAR = '-'
+    LOGGER_JOIN_CHAR = "-"
 
     def __init__(
         self,
@@ -135,8 +135,8 @@ class CometLogger(LightningLoggerBase):
         experiment_name: Optional[str] = None,
         experiment_key: Optional[str] = None,
         offline: bool = False,
-        prefix: str = '',
-        **kwargs
+        prefix: str = "",
+        **kwargs,
     ):
         if comet_ml is None:
             raise ImportError(
@@ -248,7 +248,7 @@ class CometLogger(LightningLoggerBase):
                 metrics[key] = val.cpu().detach()
 
         metrics_without_epoch = metrics.copy()
-        epoch = metrics_without_epoch.pop('epoch', None)
+        epoch = metrics_without_epoch.pop("epoch", None)
         metrics_without_epoch = self._add_prefix(metrics_without_epoch)
         self.experiment.log_metrics(metrics_without_epoch, step=step, epoch=epoch)
 
@@ -310,7 +310,7 @@ class CometLogger(LightningLoggerBase):
         # Save the experiment id in case an experiment object already exists,
         # this way we could create an ExistingExperiment pointing to the same
         # experiment
-        state["_experiment_key"] = self._experiment.id if self._experiment is not None else None
+        state["_experiment_key"] = (self._experiment.id if self._experiment is not None else None)
 
         # Remove the experiment object as it contains hard to pickle objects
         # (like network connections), the experiment object will be recreated if

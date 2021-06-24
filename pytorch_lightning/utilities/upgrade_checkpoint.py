@@ -38,7 +38,7 @@ def upgrade_checkpoint(filepath):
         if key in checkpoint:
             value = checkpoint[key]
             callback_type, callback_key = new_path
-            checkpoint["callbacks"][callback_type] = checkpoint["callbacks"].get(callback_type) or {}
+            checkpoint["callbacks"][callback_type] = (checkpoint["callbacks"].get(callback_type) or {})
             checkpoint["callbacks"][callback_type][callback_key] = value
             del checkpoint[key]
 

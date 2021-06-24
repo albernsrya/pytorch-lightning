@@ -63,7 +63,7 @@ def test_outputs_format(tmpdir):
 
 
 def test_training_starts_with_seed(tmpdir):
-    """ Test that the training always starts with the same random state (when using seed_everything). """
+    """Test that the training always starts with the same random state (when using seed_everything)."""
 
     class SeededModel(BoringModel):
 
@@ -95,7 +95,7 @@ def test_training_starts_with_seed(tmpdir):
     assert torch.allclose(sequence0, sequence1)
 
 
-@pytest.mark.parametrize(['max_epochs', 'batch_idx_'], [(2, 5), (3, 8), (4, 12)])
+@pytest.mark.parametrize(["max_epochs", "batch_idx_"], [(2, 5), (3, 8), (4, 12)])
 def test_on_train_batch_start_return_minus_one(max_epochs, batch_idx_):
 
     class CurrentModel(BoringModel):
@@ -130,7 +130,10 @@ def test_should_stop_mid_epoch(tmpdir):
             return super().training_step(batch, batch_idx)
 
         def validation_step(self, *args):
-            self.validation_called_at = (self.trainer.current_epoch, self.trainer.global_step)
+            self.validation_called_at = (
+                self.trainer.current_epoch,
+                self.trainer.global_step,
+            )
             return super().validation_step(*args)
 
     model = TestModel()
@@ -147,7 +150,7 @@ def test_should_stop_mid_epoch(tmpdir):
     assert model.validation_called_at == (0, 4)
 
 
-@pytest.mark.parametrize(['output'], [(5., ), ({'a': 5}, )])
+@pytest.mark.parametrize(["output"], [(5.0, ), ({"a": 5}, )])
 def test_warning_invalid_trainstep_output(tmpdir, output):
 
     class InvalidTrainStepModel(BoringModel):
@@ -163,7 +166,7 @@ def test_warning_invalid_trainstep_output(tmpdir, output):
         match=re.escape(
             "In automatic optimization, `training_step` must either return a Tensor, "
             "a dict with key 'loss' or None (where the step will be skipped)."
-        )
+        ),
     ):
         trainer.fit(model)
 
@@ -174,10 +177,10 @@ def test_warning_valid_train_step_end(tmpdir):
 
         def training_step(self, batch, batch_idx):
             output = self(batch)
-            return {'output': output, 'batch': batch}
+            return {"output": output, "batch": batch}
 
         def training_step_end(self, outputs):
-            loss = self.loss(outputs['batch'], outputs['output'])
+            loss = self.loss(outputs["batch"], outputs["output"])
             return loss
 
     # No error is raised

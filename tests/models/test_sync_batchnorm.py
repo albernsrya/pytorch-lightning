@@ -32,8 +32,8 @@ class SyncBNModule(LightningModule):
 
         self.gpu_count = gpu_count
         self.bn_targets = None
-        if 'bn_targets' in kwargs:
-            self.bn_targets = kwargs['bn_targets']
+        if "bn_targets" in kwargs:
+            self.bn_targets = kwargs["bn_targets"]
 
         self.linear = nn.Linear(28 * 28, 10)
         self.bn_layer = nn.BatchNorm1d(28 * 28)
@@ -108,20 +108,20 @@ def test_sync_batchnorm_ddp(tmpdir):
         num_nodes=1,
         sync_batchnorm=True,
         cluster_environment=LightningEnvironment(),
-        find_unused_parameters=True
+        find_unused_parameters=True,
     )
 
     trainer = Trainer(
         default_root_dir=tmpdir,
         gpus=2,
         num_nodes=1,
-        accelerator='ddp_spawn',
+        accelerator="ddp_spawn",
         max_epochs=1,
         max_steps=3,
         sync_batchnorm=True,
         num_sanity_val_steps=0,
         replace_sampler_ddp=False,
-        plugins=[ddp]
+        plugins=[ddp],
     )
 
     trainer.fit(model, dm)

@@ -64,7 +64,7 @@ def test_hpc_hook_calls(tmpdir):
 
 
 def test_preloaded_checkpoint_lifecycle(tmpdir):
-    """ Tests that the preloaded checkpoint contents gets cleared from memory when it is not required anymore. """
+    """Tests that the preloaded checkpoint contents gets cleared from memory when it is not required anymore."""
     model = BoringModel()
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -98,7 +98,7 @@ def test_preloaded_checkpoint_lifecycle(tmpdir):
 
 
 def test_hpc_restore_attempt(tmpdir):
-    """ Test that restore() attempts to restore the hpc_ckpt with highest priority. """
+    """Test that restore() attempts to restore the hpc_ckpt with highest priority."""
     model = BoringModel()
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -138,7 +138,7 @@ def test_hpc_restore_attempt(tmpdir):
 
 
 def test_hpc_max_ckpt_version(tmpdir):
-    """ Test that the CheckpointConnector is able to find the hpc checkpoint file with the highest version. """
+    """Test that the CheckpointConnector is able to find the hpc checkpoint file with the highest version."""
     model = BoringModel()
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -152,4 +152,4 @@ def test_hpc_max_ckpt_version(tmpdir):
 
     assert trainer.checkpoint_connector.hpc_resume_path == str(tmpdir / "hpc_ckpt_33.ckpt")
     assert trainer.checkpoint_connector.max_ckpt_version_in_folder(tmpdir) == 33
-    assert trainer.checkpoint_connector.max_ckpt_version_in_folder(tmpdir / "not" / "existing") is None
+    assert (trainer.checkpoint_connector.max_ckpt_version_in_folder(tmpdir / "not" / "existing") is None)

@@ -29,7 +29,7 @@ def bleu_score(
     translate_corpus: Sequence[str],
     reference_corpus: Sequence[str],
     n_gram: int = 4,
-    smooth: bool = False
+    smooth: bool = False,
 ) -> torch.Tensor:
     """
     .. deprecated::

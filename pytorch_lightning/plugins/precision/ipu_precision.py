@@ -31,7 +31,7 @@ class IPUPrecisionPlugin(PrecisionPlugin):
 
     def backward(
         self,
-        model: 'pl.LightningModule',
+        model: "pl.LightningModule",
         closure_loss: Tensor,
         optimizer: Optimizer,
         opt_idx: int,
@@ -47,7 +47,7 @@ class IPUPrecisionPlugin(PrecisionPlugin):
         optimizer: Optimizer,
         clip_val: Union[int, float],
         gradient_clip_algorithm: GradClipAlgorithmType = GradClipAlgorithmType.NORM,
-        model: Optional[Module] = None
+        model: Optional[Module] = None,
     ) -> None:
         """Clips the gradients"""
         if clip_val is None:

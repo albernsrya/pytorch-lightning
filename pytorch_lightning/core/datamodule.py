@@ -165,7 +165,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_prepared_data` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_prepared_data` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_prepared_data
 
@@ -179,7 +179,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
         .. deprecated:: v1.4
             Will be removed in v1.6.0.
         """
-        rank_zero_deprecation('DataModule property `has_setup_fit` was deprecated in v1.4 and will be removed in v1.6.')
+        rank_zero_deprecation("DataModule property `has_setup_fit` was deprecated in v1.4 and will be removed in v1.6.")
         return self._has_setup_fit
 
     @property
@@ -193,7 +193,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_setup_validate` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_setup_validate` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_setup_validate
 
@@ -208,7 +208,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_setup_test` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_setup_test` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_setup_test
 
@@ -223,7 +223,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_setup_predict` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_setup_predict` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_setup_predict
 
@@ -238,7 +238,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_teardown_fit` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_teardown_fit` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_teardown_fit
 
@@ -253,7 +253,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_teardown_validate` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_teardown_validate` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_teardown_validate
 
@@ -268,7 +268,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_teardown_test` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_teardown_test` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_teardown_test
 
@@ -283,7 +283,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             Will be removed in v1.6.0.
         """
         rank_zero_deprecation(
-            'DataModule property `has_teardown_predict` was deprecated in v1.4 and will be removed in v1.6.'
+            "DataModule property `has_teardown_predict` was deprecated in v1.4 and will be removed in v1.6."
         )
         return self._has_teardown_predict
 
@@ -378,7 +378,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
             datamodule.test_dataloader = test_dataloader
         return datamodule
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> 'LightningDataModule':
+    def __new__(cls, *args: Any, **kwargs: Any) -> "LightningDataModule":
         obj = super().__new__(cls)
         # track `DataHooks` calls and run `prepare_data` only on rank zero
         obj.prepare_data = cls._track_data_hook_calls(obj, obj.prepare_data)
@@ -387,7 +387,7 @@ class LightningDataModule(CheckpointHooks, DataHooks):
         return obj
 
     @staticmethod
-    def _track_data_hook_calls(obj: 'LightningDataModule', fn: callable) -> callable:
+    def _track_data_hook_calls(obj: "LightningDataModule", fn: callable) -> callable:
         """A decorator that checks if prepare_data/setup/teardown has been called.
 
         - When ``dm.prepare_data()`` is called, ``dm.has_prepared_data`` gets set to True

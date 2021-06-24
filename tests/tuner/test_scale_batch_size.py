@@ -51,15 +51,18 @@ class BatchSizeModel(BoringModel):
         return DataLoader(RandomDataset(32, 64), batch_size=getattr(self, "batch_size", 1))
 
 
-@pytest.mark.parametrize(["model_bs", "dm_bs"], [
-    (2, -1),
-    (2, 2),
-    (2, None),
-    (None, 2),
-    (16, 16),
-])
+@pytest.mark.parametrize(
+    ["model_bs", "dm_bs"],
+    [
+        (2, -1),
+        (2, 2),
+        (2, None),
+        (None, 2),
+        (16, 16),
+    ],
+)
 def test_scale_batch_size_method_with_model_or_datamodule(tmpdir, model_bs, dm_bs):
-    """ Test the tuner method `Tuner.scale_batch_size` with a datamodule. """
+    """Test the tuner method `Tuner.scale_batch_size` with a datamodule."""
     trainer = Trainer(
         default_root_dir=tmpdir,
         limit_train_batches=1,
@@ -85,7 +88,7 @@ def test_scale_batch_size_method_with_model_or_datamodule(tmpdir, model_bs, dm_b
 
 
 def test_model_reset_correctly(tmpdir):
-    """ Check that model weights are correctly reset after scaling batch size. """
+    """Check that model weights are correctly reset after scaling batch size."""
     tutils.reset_seed()
 
     model = EvalModelTemplate()
@@ -103,12 +106,13 @@ def test_model_reset_correctly(tmpdir):
     after_state_dict = model.state_dict()
 
     for key in before_state_dict.keys():
-        assert torch.all(torch.eq(before_state_dict[key], after_state_dict[key])), \
-            'Model was not reset correctly after scaling batch size'
+        assert torch.all(
+            torch.eq(before_state_dict[key], after_state_dict[key])
+        ), "Model was not reset correctly after scaling batch size"
 
 
 def test_trainer_reset_correctly(tmpdir):
-    """ Check that all trainer parameters are reset correctly after scaling batch size. """
+    """Check that all trainer parameters are reset correctly after scaling batch size."""
     tutils.reset_seed()
 
     model = EvalModelTemplate()
@@ -120,13 +124,13 @@ def test_trainer_reset_correctly(tmpdir):
     )
 
     changed_attributes = [
-        'callbacks',
-        'checkpoint_callback',
-        'current_epoch',
-        'limit_train_batches',
-        'logger',
-        'max_steps',
-        'weights_summary',
+        "callbacks",
+        "checkpoint_callback",
+        "current_epoch",
+        "limit_train_batches",
+        "logger",
+        "max_steps",
+        "weights_summary",
     ]
     expected = {ca: getattr(trainer, ca) for ca in changed_attributes}
     trainer.tuner.scale_batch_size(model, max_trials=5)
@@ -136,13 +140,13 @@ def test_trainer_reset_correctly(tmpdir):
 
 
 @RunIf(min_gpus=1)
-@pytest.mark.parametrize('scale_arg', ['power', 'binsearch', True])
+@pytest.mark.parametrize("scale_arg", ["power", "binsearch", True])
 def test_auto_scale_batch_size_trainer_arg(tmpdir, scale_arg):
-    """ Test possible values for 'batch size auto scaling' Trainer argument. """
+    """Test possible values for 'batch size auto scaling' Trainer argument."""
     tutils.reset_seed()
     hparams = EvalModelTemplate.get_default_hparams()
     model = EvalModelTemplate(**hparams)
-    before_batch_size = hparams.get('batch_size')
+    before_batch_size = hparams.get("batch_size")
     trainer = Trainer(
         default_root_dir=tmpdir,
         max_epochs=1,
@@ -151,20 +155,21 @@ def test_auto_scale_batch_size_trainer_arg(tmpdir, scale_arg):
     )
     trainer.tune(model)
     after_batch_size = model.batch_size
-    assert before_batch_size != after_batch_size, \
-        'Batch size was not altered after running auto scaling of batch size'
+    assert (
+        before_batch_size != after_batch_size
+    ), "Batch size was not altered after running auto scaling of batch size"
 
-    assert not os.path.exists(tmpdir / 'scale_batch_size_temp_model.ckpt')
+    assert not os.path.exists(tmpdir / "scale_batch_size_temp_model.ckpt")
 
 
 @RunIf(min_gpus=1)
-@pytest.mark.parametrize('use_hparams', [True, False])
+@pytest.mark.parametrize("use_hparams", [True, False])
 def test_auto_scale_batch_size_set_model_attribute(tmpdir, use_hparams):
-    """ Test that new batch size gets written to the correct hyperparameter attribute. """
+    """Test that new batch size gets written to the correct hyperparameter attribute."""
     tutils.reset_seed()
 
     hparams = EvalModelTemplate.get_default_hparams()
-    before_batch_size = hparams.get('batch_size')
+    before_batch_size = hparams.get("batch_size")
 
     class HparamsEvalModelTemplate(EvalModelTemplate):
 
@@ -181,7 +186,9 @@ def test_auto_scale_batch_size_set_model_attribute(tmpdir, use_hparams):
 
     model_class = HparamsEvalModelTemplate if use_hparams else EvalModelTemplate
     model = model_class(**hparams)
-    model.datamodule = datamodule_model  # unused when another module gets passed to .tune() / .fit()
+    model.datamodule = (
+        datamodule_model  # unused when another module gets passed to .tune() / .fit()
+    )
 
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -200,7 +207,7 @@ def test_auto_scale_batch_size_set_model_attribute(tmpdir, use_hparams):
 
 
 def test_auto_scale_batch_size_duplicate_attribute_warning(tmpdir):
-    """ Test for a warning when model.batch_size and model.hparams.batch_size both present. """
+    """Test for a warning when model.batch_size and model.hparams.batch_size both present."""
 
     class TestModel(BoringModel):
 
@@ -211,21 +218,26 @@ def test_auto_scale_batch_size_duplicate_attribute_warning(tmpdir):
             self.save_hyperparameters()
 
     model = TestModel()
-    trainer = Trainer(default_root_dir=tmpdir, max_steps=1, max_epochs=1000, auto_scale_batch_size=True)
+    trainer = Trainer(
+        default_root_dir=tmpdir,
+        max_steps=1,
+        max_epochs=1000,
+        auto_scale_batch_size=True,
+    )
     expected_message = "Field `model.batch_size` and `model.hparams.batch_size` are mutually exclusive!"
     with pytest.warns(UserWarning, match=expected_message):
         trainer.tune(model)
 
 
-@pytest.mark.parametrize('scale_method', ['power', 'binsearch'])
+@pytest.mark.parametrize("scale_method", ["power", "binsearch"])
 def test_call_to_trainer_method(tmpdir, scale_method):
-    """ Test that calling the trainer method itself works. """
+    """Test that calling the trainer method itself works."""
     tutils.reset_seed()
 
     hparams = EvalModelTemplate.get_default_hparams()
     model = EvalModelTemplate(**hparams)
 
-    before_batch_size = hparams.get('batch_size')
+    before_batch_size = hparams.get("batch_size")
     # logger file to get meta
     trainer = Trainer(
         default_root_dir=tmpdir,
@@ -236,13 +248,14 @@ def test_call_to_trainer_method(tmpdir, scale_method):
     model.batch_size = after_batch_size
     trainer.fit(model)
 
-    assert before_batch_size != after_batch_size, \
-        'Batch size was not altered after running auto scaling of batch size'
+    assert (
+        before_batch_size != after_batch_size
+    ), "Batch size was not altered after running auto scaling of batch size"
 
 
 def test_error_on_dataloader_passed_to_fit(tmpdir):
     """Verify that when the auto scale batch size feature raises an error
-       if a train dataloader is passed to fit """
+    if a train dataloader is passed to fit"""
 
     # only train passed to fit
     model = EvalModelTemplate()
@@ -251,7 +264,7 @@ def test_error_on_dataloader_passed_to_fit(tmpdir):
         max_epochs=1,
         limit_val_batches=0.1,
         limit_train_batches=0.2,
-        auto_scale_batch_size='power',
+        auto_scale_batch_size="power",
     )
     fit_options = dict(train_dataloader=model.dataloader(train=True))
 
@@ -284,7 +297,7 @@ def test_scale_batch_size_no_trials(tmpdir):
         max_epochs=1,
         limit_val_batches=1,
         limit_train_batches=1,
-        auto_scale_batch_size='power',
+        auto_scale_batch_size="power",
     )
     model = BatchSizeModel(batch_size=2)
     result = trainer.tuner.scale_batch_size(model, max_trials=0)
@@ -306,10 +319,10 @@ def test_scale_batch_size_fails_with_unavailable_mode(tmpdir):
         max_epochs=1,
         limit_val_batches=1,
         limit_train_batches=1,
-        auto_scale_batch_size='ThisModeDoesNotExist',
+        auto_scale_batch_size="ThisModeDoesNotExist",
     )
 
-    with pytest.raises(ValueError, match='could either be `power` or `binsearch`'):
+    with pytest.raises(ValueError, match="could either be `power` or `binsearch`"):
         trainer.tune(model)
-    with pytest.raises(ValueError, match='could either be `power` or `binsearch`'):
-        trainer.tuner.scale_batch_size(model, mode='ThisModeDoesNotExist')
+    with pytest.raises(ValueError, match="could either be `power` or `binsearch`"):
+        trainer.tuner.scale_batch_size(model, mode="ThisModeDoesNotExist")

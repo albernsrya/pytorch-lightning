@@ -133,7 +133,11 @@ class ModelHooks:
         """
 
     def on_validation_batch_end(
-        self, outputs: Optional[STEP_OUTPUT], batch: Any, batch_idx: int, dataloader_idx: int
+        self,
+        outputs: Optional[STEP_OUTPUT],
+        batch: Any,
+        batch_idx: int,
+        dataloader_idx: int,
     ) -> None:
         """
         Called in the validation loop after the batch.
@@ -156,7 +160,11 @@ class ModelHooks:
         """
 
     def on_test_batch_end(
-        self, outputs: Optional[STEP_OUTPUT], batch: Any, batch_idx: int, dataloader_idx: int
+        self,
+        outputs: Optional[STEP_OUTPUT],
+        batch: Any,
+        batch_idx: int,
+        dataloader_idx: int,
     ) -> None:
         """
         Called in the test loop after the batch.

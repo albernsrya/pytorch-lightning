@@ -75,11 +75,11 @@ class CIFAR10DataModule(LightningDataModule):
     transform = T.Compose([T.Resize(256), T.CenterCrop(224), T.ToTensor()])
 
     def train_dataloader(self, *args, **kwargs):
-        trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=self.transform)
+        trainset = torchvision.datasets.CIFAR10(root="./data", train=True, download=True, transform=self.transform)
         return torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=0)
 
     def val_dataloader(self, *args, **kwargs):
-        valset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=self.transform)
+        valset = torchvision.datasets.CIFAR10(root="./data", train=False, download=True, transform=self.transform)
         return torch.utils.data.DataLoader(valset, batch_size=32, shuffle=True, num_workers=0)
 
 
@@ -90,6 +90,6 @@ def cli_main():
     LightningCLI(ModelToProfile, CIFAR10DataModule)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_lightning_logo()
     cli_main()

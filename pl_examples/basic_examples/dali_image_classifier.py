@@ -39,11 +39,11 @@ if _DALI_AVAILABLE:
     from nvidia.dali.pipeline import Pipeline
     from nvidia.dali.plugin.pytorch import DALIClassificationIterator
 
-    NEW_DALI_API = Version(dali_version) >= Version('0.28.0')
+    NEW_DALI_API = Version(dali_version) >= Version("0.28.0")
     if NEW_DALI_API:
         from nvidia.dali.plugin.base_iterator import LastBatchPolicy
 else:
-    warn('NVIDIA DALI is not available')
+    warn("NVIDIA DALI is not available")
     ops, Pipeline, DALIClassificationIterator, LastBatchPolicy = ..., ABC, ABC, ABC
 
 
@@ -107,7 +107,7 @@ class DALIClassificationLoader(DALIClassificationIterator):
         last_batch_padded=False,
     ):
         if NEW_DALI_API:
-            last_batch_policy = LastBatchPolicy.FILL if fill_last_batch else LastBatchPolicy.DROP
+            last_batch_policy = (LastBatchPolicy.FILL if fill_last_batch else LastBatchPolicy.DROP)
             super().__init__(
                 pipelines,
                 size,
@@ -115,11 +115,17 @@ class DALIClassificationLoader(DALIClassificationIterator):
                 auto_reset,
                 dynamic_shape,
                 last_batch_policy=last_batch_policy,
-                last_batch_padded=last_batch_padded
+                last_batch_padded=last_batch_padded,
             )
         else:
             super().__init__(
-                pipelines, size, reader_name, auto_reset, fill_last_batch, dynamic_shape, last_batch_padded
+                pipelines,
+                size,
+                reader_name,
+                auto_reset,
+                fill_last_batch,
+                dynamic_shape,
+                last_batch_padded,
             )
         self._fill_last_batch = fill_last_batch
 
@@ -161,13 +167,13 @@ class LitClassifier(pl.LightningModule):
         x, y = self.split_batch(batch)
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('valid_loss', loss)
+        self.log("valid_loss", loss)
 
     def test_step(self, batch, batch_idx):
         x, y = self.split_batch(batch)
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('test_loss', loss)
+        self.log("test_loss", loss)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)

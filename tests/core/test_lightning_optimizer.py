@@ -125,8 +125,8 @@ def test_lightning_optimizer_manual_optimization_and_accumulated_gradients(tmpdi
         weights_summary=None,
     )
 
-    with patch.multiple(torch.optim.SGD, zero_grad=DEFAULT, step=DEFAULT) as sgd, \
-         patch.multiple(torch.optim.Adam, zero_grad=DEFAULT, step=DEFAULT) as adam:
+    with patch.multiple(torch.optim.SGD, zero_grad=DEFAULT, step=DEFAULT
+                        ) as sgd, patch.multiple(torch.optim.Adam, zero_grad=DEFAULT, step=DEFAULT) as adam:
         trainer.fit(model)
 
     assert sgd["step"].call_count == 4
@@ -220,8 +220,7 @@ def test_lightning_optimizer_automatic_optimization_optimizer_zero_grad(tmpdir):
         weights_summary=None,
     )
 
-    with patch("torch.optim.Adam.zero_grad") as adam_zero_grad, \
-         patch("torch.optim.SGD.zero_grad") as sgd_zero_grad:
+    with patch("torch.optim.Adam.zero_grad") as adam_zero_grad, patch("torch.optim.SGD.zero_grad") as sgd_zero_grad:
         trainer.fit(model)
 
     assert adam_zero_grad.call_count == 4
@@ -268,8 +267,8 @@ def test_lightning_optimizer_automatic_optimization_optimizer_step(tmpdir):
         weights_summary=None,
     )
 
-    with patch.multiple(torch.optim.SGD, zero_grad=DEFAULT, step=DEFAULT) as sgd, \
-         patch.multiple(torch.optim.Adam, zero_grad=DEFAULT, step=DEFAULT) as adam:
+    with patch.multiple(torch.optim.SGD, zero_grad=DEFAULT, step=DEFAULT
+                        ) as sgd, patch.multiple(torch.optim.Adam, zero_grad=DEFAULT, step=DEFAULT) as adam:
         trainer.fit(model)
 
     assert sgd["step"].call_count == 4
@@ -315,7 +314,7 @@ class OptimizerWithHooks(Optimizer):
         self.params = []
         for _, mod in model.named_modules():
             mod_class = mod.__class__.__name__
-            if mod_class != 'Linear':
+            if mod_class != "Linear":
                 continue
 
             handle = mod.register_forward_pre_hook(self._save_input)  # save the inputs
@@ -329,7 +328,7 @@ class OptimizerWithHooks(Optimizer):
                 params.append(mod.bias)
 
             # save a param_group for each module
-            d = {'params': params, 'mod': mod, 'layer_type': mod_class}
+            d = {"params": params, "mod": mod, "layer_type": mod_class}
             self.params.append(d)
 
         super(OptimizerWithHooks, self).__init__(self.params, {"lr": 0.01})
@@ -337,7 +336,7 @@ class OptimizerWithHooks(Optimizer):
     def _save_input(self, mod, i):
         """Saves input of layer"""
         if mod.training:
-            self.state[mod]['x'] = i[0]
+            self.state[mod]["x"] = i[0]
 
     def _save_grad_output(self, mod, _, grad_output):
         """
@@ -346,13 +345,13 @@ class OptimizerWithHooks(Optimizer):
         """
         batch_size = grad_output[0].shape[0]
         if mod.training:
-            self.state[mod]['grad'] = grad_output[0] * batch_size
+            self.state[mod]["grad"] = grad_output[0] * batch_size
 
     def step(self, closure=None):
         closure()
         for group in self.param_groups:
-            _ = self.state[group['mod']]['x']
-            _ = self.state[group['mod']]['grad']
+            _ = self.state[group["mod"]]["x"]
+            _ = self.state[group["mod"]]["grad"]
         return True
 
 
@@ -375,7 +374,12 @@ def test_lightning_optimizer_keeps_hooks(tmpdir):
             del self.trainer._lightning_optimizers
             gc.collect()  # not necessary, just in case
 
-    trainer = Trainer(default_root_dir=tmpdir, limit_train_batches=4, limit_val_batches=1, max_epochs=1)
+    trainer = Trainer(
+        default_root_dir=tmpdir,
+        limit_train_batches=4,
+        limit_val_batches=1,
+        max_epochs=1,
+    )
     model = TestModel()
     trainer.fit(model)
     assert model.count_on_train_batch_start == 4

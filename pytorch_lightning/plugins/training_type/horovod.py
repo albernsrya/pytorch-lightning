@@ -28,7 +28,7 @@ if _HOROVOD_AVAILABLE:
 
 
 class HorovodPlugin(ParallelPlugin):
-    """ Plugin for Horovod distributed training integration."""
+    """Plugin for Horovod distributed training integration."""
 
     def __init__(self, parallel_devices: Optional[List[torch.device]] = None):
         super().__init__(parallel_devices=parallel_devices, cluster_environment=None)
@@ -92,7 +92,8 @@ class HorovodPlugin(ParallelPlugin):
         # Horovod: wrap optimizers to perform gradient aggregation via allreduce
         optimizers = [
             hvd.DistributedOptimizer(
-                optimizer, named_parameters=_filter_named_parameters(self.lightning_module, optimizer)
+                optimizer,
+                named_parameters=_filter_named_parameters(self.lightning_module, optimizer),
             ) for optimizer in optimizers
         ]
         self.lightning_module.trainer.accelerator.optimizers = optimizers
@@ -143,7 +144,12 @@ class HorovodPlugin(ParallelPlugin):
         else:
             hvd.join()
 
-    def reduce(self, tensor, group: Optional[Any] = None, reduce_op: Optional[Union[ReduceOp, str]] = "mean"):
+    def reduce(
+        self,
+        tensor,
+        group: Optional[Any] = None,
+        reduce_op: Optional[Union[ReduceOp, str]] = "mean",
+    ):
         """
         Reduces a tensor from several distributed processes to one aggregated tensor.
 
@@ -177,7 +183,7 @@ class HorovodPlugin(ParallelPlugin):
         self,
         result: Union[torch.Tensor],
         group: Optional[Any] = group.WORLD,
-        sync_grads: bool = False
+        sync_grads: bool = False,
     ) -> torch.Tensor:
         if group is not None and group != group.WORLD:
             raise ValueError(
@@ -195,7 +201,13 @@ class HorovodPlugin(ParallelPlugin):
         gathered_result = list(gathered.split(1, dim=0))
         return gathered_result
 
-    def post_backward(self, closure_loss: torch.Tensor, should_accumulate: bool, optimizer: Optimizer, opt_idx: int):
+    def post_backward(
+        self,
+        closure_loss: torch.Tensor,
+        should_accumulate: bool,
+        optimizer: Optimizer,
+        opt_idx: int,
+    ):
         # synchronize all horovod optimizers.
         for optimizer in self.lightning_module.trainer.optimizers:
             optimizer.synchronize()

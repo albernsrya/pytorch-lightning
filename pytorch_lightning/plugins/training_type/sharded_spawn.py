@@ -32,12 +32,13 @@ if _FAIRSCALE_AVAILABLE:
 
 
 class DDPSpawnShardedPlugin(DDPSpawnPlugin):
-    """ Optimizer sharded training provided by FairScale. """
+    """Optimizer sharded training provided by FairScale."""
 
     def configure_ddp(self):
         self._wrap_optimizers()
         self._model = ShardedDataParallel(
-            LightningShardedDataParallel(self.model), sharded_optimizer=self.lightning_module.trainer.optimizers
+            LightningShardedDataParallel(self.model),
+            sharded_optimizer=self.lightning_module.trainer.optimizers,
         )
         setattr(self._model, "require_backward_grad_sync", False)
 
@@ -57,7 +58,7 @@ class DDPSpawnShardedPlugin(DDPSpawnPlugin):
             return
         self._reinit_optimizers_with_oss()
 
-    def optimizer_state(self, optimizer: 'OSS') -> Optional[dict]:
+    def optimizer_state(self, optimizer: "OSS") -> Optional[dict]:
         if isinstance(optimizer, OSS):
             optimizer.consolidate_state_dict()
         return self._optim_state_dict(optimizer)
@@ -79,7 +80,13 @@ class DDPSpawnShardedPlugin(DDPSpawnPlugin):
             )
         return unwrap_lightning_module_sharded(self._model)
 
-    def pre_backward(self, closure_loss: torch.Tensor, should_accumulate: bool, optimizer: Optimizer, opt_idx: int):
+    def pre_backward(
+        self,
+        closure_loss: torch.Tensor,
+        should_accumulate: bool,
+        optimizer: Optimizer,
+        opt_idx: int,
+    ):
         pass
 
     def post_training_step(self):

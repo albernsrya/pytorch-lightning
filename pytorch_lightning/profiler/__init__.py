@@ -200,10 +200,10 @@ from pytorch_lightning.profiler.pytorch import PyTorchProfiler
 from pytorch_lightning.profiler.simple import SimpleProfiler
 
 __all__ = [
-    'AbstractProfiler',
-    'BaseProfiler',
-    'AdvancedProfiler',
-    'PassThroughProfiler',
-    'PyTorchProfiler',
-    'SimpleProfiler',
+    "AbstractProfiler",
+    "BaseProfiler",
+    "AdvancedProfiler",
+    "PassThroughProfiler",
+    "PyTorchProfiler",
+    "SimpleProfiler",
 ]
