@@ -342,10 +342,10 @@ class ModelCheckpoint(Callback):
         from pytorch_lightning.trainer.states import TrainerFn
 
         return (
-            trainer.fast_dev_run or trainer.state.fn !=  # disable checkpointing with fast_dev_run
-            TrainerFn.FITTING or trainer.sanity_checking or  # don't save anything during non-fit
-            self._last_global_step_saved ==  # don't save anything during sanity check
-            trainer.global_step  # already saved at the last step
+            trainer.fast_dev_run or trainer.state.fn != TrainerFn.FITTING or
+            trainer.sanity_checking or  # disable checkpointing with fast_dev_run
+            self._last_global_step_saved == trainer.
+            global_step  # don't save anything during non-fit  # don't save anything during sanity check  # already saved at the last step
         )
 
     def __validate_init_configuration(self) -> None:
